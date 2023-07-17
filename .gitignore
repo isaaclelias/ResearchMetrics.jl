@@ -1,0 +1,4 @@
+*.pdf
+.ipynb_checkpoints/
+resources/
+secrets.jl
