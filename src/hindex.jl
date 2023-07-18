@@ -16,21 +16,10 @@ using HTTP
 using TimeSeries
 
 export Author, Abstract
-export getAuthorsFromCSV, getCitations, popSelfCitations
+export getAuthor, getAuthorsFromCSV, getCitations, popSelfCitations!
 
-# Preparing API 
-api_url = "https://api.elsevier.com/content/search/scopus"
-params = Dict(
-              "exemplo" => "exemplo"
-             )
-@warn "params not set"
-params_encode = HTTP.URLEncodeçparamsencode(params)
-url = api_url * "?" * params_encode
-request = HTTP.Request("GET", url)
-HTTP.addheader!(request, "Accept",        "application/json")
-HTTP.addheader!(request, "Authorization", "Bearer XXXXXXXXX")
-HTTP.addheader!(request, "",              "")
-@warn "OAuth bearer access token not set"
+print("Enter the Scopus API key: ")
+scopus_api_key = readline()
 
 """
 Stores informations about the author based on a database query.
@@ -47,6 +36,21 @@ struct Abstract
 
 end
 @warn "Abstract not implemented"
+
+function getAuthor(query)::Author
+    # Preparing API 
+    endpoint = "https://api.elsevier.com/content/search/author"
+    headers = [
+               "Accept" => "application/json",
+               "X-ELS-APIKey" => scopus_api_key
+              ]
+    params = ["query" => query]
+    request = HTTP.request(:GET, endpoint, headers, query=params)
+    println(request.status)
+    println(String(request.body))
+    
+    return Author
+end
 
 """
     getAuthorsFromCSV()
