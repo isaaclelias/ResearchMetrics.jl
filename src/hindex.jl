@@ -31,9 +31,27 @@ Fields meaning
 - `DATABASE_id`: id of the chosen researcher from query results
 """
 struct Author
-  
+    # Query data
+    query_name::String
+    query_affiliation::String
+
+    # Scopus
+    scopus_id::Union{Int, Nothing}
+    scopus_preferred_name::Union{String, Nothing}
+    scopus_affiliation::Union{String, Nothing}
+    scopus_returned_ids::Union{Vector{Int}, Nothing}
+
+    # ORCID
+    orcid_id
+
+    # Enforce that `Author` has at least these two fields filled up
+    function Author(query_name::String, query_affiliation::String)
+        author = new()
+        author.query_name = query_name
+        author.query_affiliation = query_affiliation
+        return author
+    end
 end
-@warn "Author not implemented"
 
 """
 Store information about abstracts.
@@ -43,7 +61,7 @@ struct Abstract
 end
 @warn "Abstract not implemented"
 
-function getAuthor(query)::Author
+function setScopusData!(author::Author)
     # Preparing API 
     endpoint = "https://api.elsevier.com/content/search/author"
     headers = [
@@ -55,7 +73,7 @@ function getAuthor(query)::Author
     println(request.status)
     println(String(request.body))
     
-    return Author
+    # Parsing the data
 end
 
 """
