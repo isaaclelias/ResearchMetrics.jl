@@ -4,6 +4,7 @@
 # Get all papers that cite paper in papers that he published
 # Exlude self citations
 # Calculate h-index by time
+#-------------------------------------------------------------------------------
 
 include("../secrets.jl")
 
@@ -23,6 +24,11 @@ scopus_api_key = readline()
 
 """
 Stores informations about the author based on a database query.
+
+Fields meaning
+- `query_name`: name used for querying the database 
+- `query_affiliation`: institution used for querying the database 
+- `DATABASE_id`: id of the chosen researcher from query results
 """
 struct Author
   
@@ -30,7 +36,7 @@ end
 @warn "Author not implemented"
 
 """
-Stores informations about the author based on a database query.
+Store information about abstracts.
 """
 struct Abstract
 
@@ -71,7 +77,7 @@ function getCitations(abstract::Abstract)::Vector{Abstract}
 end
 
 """
-    popSelfCitations()
+    popSelfCitations!()
 
 Pops all papers authored by `author` from the `abstracts`.
 """
@@ -87,3 +93,5 @@ Returns a timeseries
 function calcHIndexTimeseries(arguments)::TimeArray
   
 end
+
+end #module
