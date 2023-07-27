@@ -65,7 +65,6 @@ mutable struct Abstract
     scopus_authids::Union{Vector{String}, Nothing}
     is_in_scopus::Union{Bool, Nothing}
     
-    # Enforce that `Author` has at least these two fields filled up
     function Abstract()
         author = new(ntuple(x->nothing, fieldcount(Abstract))...)
         return author
@@ -135,10 +134,10 @@ function getAuthoredAbstracts(author::Author)::Vector{Abstract}
         authored_abstracts[i].doi = abstract["prism:doi"]
 
         n_authors = length(abstract["author"]) # number of authors the abstract has
-        authored_abstracts[i].scopus_authid = Vector{Abstract}(undef, n_authors) # initializing the Vector
+        authored_abstracts[i].scopus_authid = Vector{Int}(undef, n_authors) # initializing the Vector
         for (j, abstract_author) in enumerate(abstract["author"])
             # double check for authorship could go here
-            authored_abstracts[i].scopus_authid[j] = abstract_author["authid"]
+            authored_abstracts[i].scopus_authid[j] = parse(Int, abstract_author["authid"])
         end
     end
     
