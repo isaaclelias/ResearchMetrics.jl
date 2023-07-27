@@ -8,6 +8,9 @@
 
 """
 Provides functions to bulk query scientific database for authors and analyse their h-indexes.
+
+Issues:
+- Scopus API only allows 2 requests/second. This will take forever.
 """
 module HIndex
 
@@ -83,8 +86,8 @@ function setScopusData!(author::Author)
     params = ["query" => "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"]
     @info "Querying Scopus for" author.query_name author.query_affiliation
     response = HTTP.get(endpoint, headers; query=params).body |> String |> JSON.parse
-    # Parsing the data
 
+    # Setting the values
     author.scopus_firstname         = response["search-results"]["entry"][1]["preferred-name"]["given-name"]
     author.scopus_lastname          = response["search-results"]["entry"][1]["preferred-name"]["surname"]
     author.scopus_id                = response["search-results"]["entry"][1]["eid"]
