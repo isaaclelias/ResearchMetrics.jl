@@ -90,7 +90,6 @@ function setScopusData!(author::Author)
     # Setting the values
     author.scopus_firstname         = response["search-results"]["entry"][1]["preferred-name"]["given-name"]
     author.scopus_lastname          = response["search-results"]["entry"][1]["preferred-name"]["surname"]
-    author.scopus_id                = response["search-results"]["entry"][1]["eid"]
     author.scopus_affiliation_id    = response["search-results"]["entry"][1]["affiliation-current"]["affiliation-id"]
     author.scopus_affiliation_name  = response["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
     author.orcid_id                 = response["search-results"]["entry"][1]["orcid"]
