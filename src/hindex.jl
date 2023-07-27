@@ -16,7 +16,7 @@ using JSON
 using TimeSeries
 
 export Author, Abstract
-export setScopusData!, getAuthorsFromCSV, getCitations, popSelfCitations!
+export setScopusData!, getAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!
 
 print("Enter the Scopus API key: ")
 scopus_api_key = readline()
@@ -35,7 +35,7 @@ mutable struct Author
     query_affiliation::Union{String, Nothing}
 
     # Scopus
-    scopus_id::Union{String, Nothing}
+    scopus_authid::Union{Int, Nothing}
     scopus_firstname::Union{String, Nothing}
     scopus_lastname::Union{String, Nothing}
     scopus_affiliation_name::Union{String, Nothing}
@@ -57,11 +57,22 @@ end
 """
 Store information about abstracts.
 """
-struct Abstract
-
+mutable struct Abstract
+    doi::Union{String, Nothing}
+    scopus_authids::Union{Vector{String}, Nothing}
+    is_in_scopus::Union{Bool, Nothing}
+    
+    # Enforce that `Author` has at least these two fields filled up
+    function Abstract()
+        author = new(ntuple(x->nothing, fieldcount(Abstract))...)
+        return author
+    end
 end
-@warn "Abstract not implemented"
 
+"""
+Tasks:
+- Trim the authid (maybe with regex)
+"""
 function setScopusData!(author::Author)
     # Preparing API 
     endpoint = "https://api.elsevier.com/content/search/author"
@@ -81,6 +92,55 @@ function setScopusData!(author::Author)
     author.scopus_affiliation_name  = response["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
     author.orcid_id                 = response["search-results"]["entry"][1]["orcid"]
     author.scopus_query_nresults    = response["search-results"]["opensearch:totalResults"]
+    ## Triming the authors url to get the id
+    scopus_authid                   = response["search-results"]["entry"][1]["prism:url"]
+    scopus_authid                   = replace(scopus_authid, r"https://api.elsevier.com/content/author/author_id/"=>"")
+    author.scopus_authid            = parse(Int, scopus_authid)
+
+    @info "Received data from Scopus:" author.scopus_lastname author.scopus_firstname author.scopus_authid author.query_affiliation author.scopus_affiliation_name author.scopus_affiliation_id
+end
+
+"""
+- write!
+
+Tasks:
+- Iterate over the list of received objects and populate the Vector{Abstract}
+- Do a double check wheater the received abstracts indeed are authored by the given author
+"""
+function getAuthoredAbstracts(author::Author)::Vector{Abstract}
+    # Preparing API 
+    endpoint = "https://api.elsevier.com/content/search/scopus"
+    headers = [
+               "Accept" => "application/json",
+               "X-ELS-APIKey" => String(scopus_api_key)
+              ]
+    query_string = "AU-ID($(author.scopus_authid))"
+    params = ["query" => query_string]
+    @info "Querying Scopus for" author
+    response = HTTP.get(endpoint, headers; query=params).body |> String |> JSON.parse
+        
+    # Setting the values
+    n_abstracts = parse(Int, response["search-results"]["opensearch:totalResults"])
+    @info n_abstracts 
+    authored_abstracts = Vector{Abstract}(undef, n_abstracts)
+    @info "the iterable:" response["search-results"]["entry"]
+    # debugging
+    for abs in response["search-results"]["entry"]
+        @info abs
+    end
+    for (i, abstract) in enumerate(response["search-results"]["entry"])
+        authored_abstracts[i] = Abstract() # initializing the struct
+        authored_abstracts[i].doi = abstract["prism:doi"]
+
+        n_authors = length(abstract["author"]) # number of authors the abstract has
+        authored_abstracts[i].scopus_authid = Vector{Abstract}(undef, n_authors) # initializing the Vector
+        for (j, abstract_author) in enumerate(abstract["author"])
+            # double check for authorship could go here
+            authored_abstracts[i].scopus_authid[j] = abstract_author["authid"]
+        end
+    end
+    
+    return authored_abstracts
 end
 
 """
