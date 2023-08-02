@@ -11,6 +11,10 @@ Provides functions to bulk query scientific database for authors and analyse the
 
 Issues:
 - Scopus API only allows 2 requests/second. This will take forever.
+
+Tasks:
+- Get data from output/extern before querying scopus
+- Refactor querying scopus to a separate function
 """
 module HIndex
 
