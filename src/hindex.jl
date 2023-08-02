@@ -127,6 +127,20 @@ function setScopusData!(author::Author)
     @info "Received data from Scopus:" author.scopus_lastname author.scopus_firstname author.scopus_authid author.scopus_affiliation_name author.scopus_affiliation_id
 end
 
+"""
+    setScopusData!(::Abstract)
+
+Uses the Scopus Abstract Retrieval API to get data.
+"""
+function setScopusData!(abstract::Abstract)
+     # Preparing API 
+    endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
+    query_string = abstract.scopus
+    @info "Querying Scopus for abstracts by" author
+    response = HTTP.get(endpoint, headers; query=params).body |> String
+    response_parse = JSON.parse(response) 
+
+
 end
 
 """
