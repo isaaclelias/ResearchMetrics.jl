@@ -5,6 +5,6 @@ using .HIndex
 ENV["JULIA_DEBUG"] = HIndex
 
 hasse = Author("hasse", "technische universitat darmstadt")
-setScopusData!(hasse)
+@time setScopusData!(hasse)
 
 articles_hasse = getAuthoredAbstracts(hasse)
