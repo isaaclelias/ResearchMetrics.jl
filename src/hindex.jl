@@ -17,12 +17,15 @@ module HIndex
 using HTTP
 using JSON
 using TimeSeries
+using Dates
+using SHA
 
 export Author, Abstract
 export setScopusData!, getAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!
 
-print("Enter the Scopus API key: ")
-scopus_api_key = readline()
+print("Enter the Scopus API key: "); scopus_api_key = readline()
+sha_length = 20
+api_query_folder = "output/extern"
 
 """
 Stores informations about the author based on a database query.
