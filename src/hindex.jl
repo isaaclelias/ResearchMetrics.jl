@@ -47,6 +47,7 @@ mutable struct Author
     scopus_affiliation_name::Union{String, Nothing}
     scopus_affiliation_id::Union{String, Nothing}
     scopus_query_nresults::Union{String, Nothing}
+    scopus_query_string::Union{String, Nothing}
 
     # ORCID
     orcid_id
@@ -85,23 +86,39 @@ function setScopusData!(author::Author)
                "Accept" => "application/json",
                "X-ELS-APIKey" => String(scopus_api_key)
               ]
-    params = ["query" => "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"]
+    query_string = "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"
+    params = ["query" => query_string]
     @info "Querying Scopus for" author.query_name author.query_affiliation
-    response = HTTP.get(endpoint, headers; query=params).body |> String |> JSON.parse
+    @time response = HTTP.get(endpoint, headers; query=params).body |> String
+    response_parse = JSON.parse(response)
 
-    # Setting the values
-    author.scopus_firstname         = response["search-results"]["entry"][1]["preferred-name"]["given-name"]
-    author.scopus_lastname          = response["search-results"]["entry"][1]["preferred-name"]["surname"]
-    author.scopus_affiliation_id    = response["search-results"]["entry"][1]["affiliation-current"]["affiliation-id"]
-    author.scopus_affiliation_name  = response["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
-    author.orcid_id                 = response["search-results"]["entry"][1]["orcid"]
-    author.scopus_query_nresults    = response["search-results"]["opensearch:totalResults"]
+    # Setting the Author values
+    author.scopus_firstname         = response_parse["search-results"]["entry"][1]["preferred-name"]["given-name"]
+    author.scopus_lastname          = response_parse["search-results"]["entry"][1]["preferred-name"]["surname"]
+    author.scopus_affiliation_id    = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-id"]
+    author.scopus_affiliation_name  = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
+    author.orcid_id                 = response_parse["search-results"]["entry"][1]["orcid"]
+    author.scopus_query_nresults    = response_parse["search-results"]["opensearch:totalResults"]
+    author.scopus_query_string      = query_string
     ## Triming the authors url to get the id
-    scopus_authid                   = response["search-results"]["entry"][1]["prism:url"]
+    scopus_authid                   = response_parse["search-results"]["entry"][1]["prism:url"]
     scopus_authid                   = replace(scopus_authid, r"https://api.elsevier.com/content/author/author_id/"=>"")
     author.scopus_authid            = parse(Int, scopus_authid)
 
-    @info "Received data from Scopus:" author.scopus_lastname author.scopus_firstname author.scopus_authid author.query_affiliation author.scopus_affiliation_name author.scopus_affiliation_id
+    # Saving the response to a file
+    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
+    fname = "Scopus-AuthorSearch"*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*query_sha*".json"
+    dirpath = api_query_folder
+    fpath = dirpath*fname
+    touch(fpath)
+    open(fpath, "w") do file
+        write(file, response)
+    end
+
+    # Logging
+    @info "Received data from Scopus:" author.scopus_lastname author.scopus_firstname author.scopus_authid author.scopus_affiliation_name author.scopus_affiliation_id
+end
+
 end
 
 """
