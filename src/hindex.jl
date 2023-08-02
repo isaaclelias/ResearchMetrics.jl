@@ -66,9 +66,13 @@ Store information about abstracts.
 """
 mutable struct Abstract
     doi::Union{String, Nothing}
+
+    # Scopus
+    scopus_scopusid::Union{String, Nothing}
     scopus_authids::Union{Vector{String}, Nothing}
     is_in_scopus::Union{Bool, Nothing}
     
+    # Empty constructor sets all fields to nothing
     function Abstract()
         author = new(ntuple(x->nothing, fieldcount(Abstract))...)
         return author
@@ -128,7 +132,7 @@ Tasks:
 - Iterate over the list of received objects and populate the Vector{Abstract}
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
-function getAuthoredAbstracts(author::Author)::Vector{Abstract}
+function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
     # Preparing API 
     endpoint = "https://api.elsevier.com/content/search/scopus"
     headers = [
@@ -137,30 +141,39 @@ function getAuthoredAbstracts(author::Author)::Vector{Abstract}
               ]
     query_string = "AU-ID($(author.scopus_authid))"
     params = ["query" => query_string]
-    @info "Querying Scopus for" author
-    response = HTTP.get(endpoint, headers; query=params).body |> String |> JSON.parse
-        
+    @info "Querying Scopus for abstracts by" author
+    response = HTTP.get(endpoint, headers; query=params).body |> String
+    response_parse = JSON.parse(response)
+    
     # Setting the values
-    n_abstracts = parse(Int, response["search-results"]["opensearch:totalResults"])
-    @info n_abstracts 
+    n_abstracts = parse(Int, response_parse["search-results"]["opensearch:totalResults"])
+    @info n_abstracts
     authored_abstracts = Vector{Abstract}(undef, n_abstracts)
-    @info "the iterable:" response["search-results"]["entry"]
     # debugging
-    for abs in response["search-results"]["entry"]
-        @info abs
-    end
-    for (i, abstract) in enumerate(response["search-results"]["entry"])
+    for (i, abstract) in enumerate(response_parse["search-results"]["entry"])
+        @show i
         authored_abstracts[i] = Abstract() # initializing the struct
         authored_abstracts[i].doi = abstract["prism:doi"]
-
+        #=
         n_authors = length(abstract["author"]) # number of authors the abstract has
         authored_abstracts[i].scopus_authid = Vector{Int}(undef, n_authors) # initializing the Vector
         for (j, abstract_author) in enumerate(abstract["author"])
             # double check for authorship could go here
             authored_abstracts[i].scopus_authid[j] = parse(Int, abstract_author["authid"])
         end
+        =#
     end
     
+    # Saving the response to a file
+    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
+    fname = "Scopus-ScopusSearch"*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*query_sha*".json"
+    dirpath = api_query_folder
+    fpath = dirpath*fname
+    touch(fpath)
+    open(fpath, "w") do file
+        write(file, response)
+    end
+
     return authored_abstracts
 end
 
