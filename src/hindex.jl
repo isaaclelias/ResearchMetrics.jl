@@ -55,7 +55,7 @@ mutable struct Author
     scopus_query_string::Union{String, Nothing}
 
     # ORCID
-    orcid_id
+    orcid_id::Union{String, Nothing}
 
     # Enforce that `Author` has at least these two fields filled up
     function Author(query_name::String, query_affiliation::String)
@@ -70,11 +70,14 @@ end
 Store information about abstracts.
 """
 mutable struct Abstract
+    title::Union{String, Nothing}
+    date_pub::Union{Date, Nothing}
     doi::Union{String, Nothing}
 
     # Scopus
-    scopus_scopusid::Union{String, Nothing}
-    scopus_authids::Union{Vector{String}, Nothing}
+    scopus_scopusid::Union{Int, Nothing}
+    scopus_eid::Union{String, Nothing}
+    scopus_authids::Union{Vector{Int}, Nothing}
     is_in_scopus::Union{Bool, Nothing}
     
     # Empty constructor sets all fields to nothing
