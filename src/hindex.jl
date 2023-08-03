@@ -23,13 +23,14 @@ using JSON
 using TimeSeries
 using Dates
 using SHA
+using Dates
 
 export Author, Abstract
-export setScopusData!, getAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!
+export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts
 
-print("Enter the Scopus API key: "); scopus_api_key = readline()
+print("Enter the Scopus API key: "); scopus_api_key = String(readline())
 sha_length = 20
-api_query_folder = "output/extern"
+api_query_folder = "output/extern/"
 
 """
 Stores informations about the author based on a database query.
