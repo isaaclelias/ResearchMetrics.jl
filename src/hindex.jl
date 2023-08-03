@@ -286,8 +286,24 @@ end
 
 Returns a timeseries 
 """
-function calcHIndexTimeseries(arguments)::TimeArray
-  
+function calcHIndexTimeseries(arg::Vector{Tuple{Abstract, Vector{Abstract}}})::TimeArray
+    pub_dates = Vector{Date}()
+    timeseries_each = Vector{TimeArray}()
+    
+    # Getting publication dates
+    for (i, tup) in enumerate(arg)
+        for citabs in tup
+            push!(pub_dates, citabs.date)
+        end
+    end
+    sort!(pub_dates)
+
+    # Constructing a citation time series for each paper
+
+    # Calculating h-index for each publication date
+    for date in pub_dates
+        []
+    end
 end
 
 end #module
