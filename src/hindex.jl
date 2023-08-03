@@ -250,21 +250,32 @@ function getScopusCitingAbstracts(abstract::Abstract)#::Vector{Abstract}
 end
 
 """
-    getCitations()
+    getAuthorsFromCSV()
 
-Querys the database for all abstracts from papers which cite the given abstract.
+Querys the database to obtain a list of scientist ids.
 """
-function getCitations(abstract::Abstract)::Vector{Abstract}
-  @warn "getCitations() not implemented"
+function getAuthorsFromCSV(file::String)::Vector{Author}
+    @warn "getAuthorsFromCSV() not implemented"
 end
 
 """
     popSelfCitations!()
 
 Pops all papers authored by `author` from the `abstracts`.
+
+Tasks:
+- TEST IT
 """
 function popSelfCitations!(abstracts::Vector{Abstract}, author::Author)
-    @warn "popSelfCitations() not implemented" 
+    for abstract in abstracts
+        if author.scopus_authid in abstract.scopus_authids
+            pop!(abstracts, abstract)
+        end
+    end
+end
+
+function calcHIndex(citation_count::Vector{Int})::Int
+    @warn "not implemented"
 end
 
 """
