@@ -189,7 +189,7 @@ function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
     endpoint = "https://api.elsevier.com/content/search/scopus"
     headers = [
                "Accept" => "application/json",
-               "X-ELS-APIKey" => String(scopus_api_key)
+               "X-ELS-APIKey" => scopus_api_key
               ]
     query_string = "AU-ID($(author.scopus_authid))"
     params = ["query" => query_string]
@@ -203,17 +203,15 @@ function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
     authored_abstracts = Vector{Abstract}(undef, n_abstracts)
     # debugging
     for (i, abstract) in enumerate(response_parse["search-results"]["entry"])
-        @show i
-        authored_abstracts[i] = Abstract() # initializing the struct
-        authored_abstracts[i].doi = abstract["prism:doi"]
-        #=
-        n_authors = length(abstract["author"]) # number of authors the abstract has
-        authored_abstracts[i].scopus_authid = Vector{Int}(undef, n_authors) # initializing the Vector
-        for (j, abstract_author) in enumerate(abstract["author"])
-            # double check for authorship could go here
-            authored_abstracts[i].scopus_authid[j] = parse(Int, abstract_author["authid"])
-        end
-        =#
+        # Setting the fields
+        authored_abstracts[i]                   = Abstract() # initializing the struct
+        authored_abstracts[i].title
+        ## Triming the abstract url to get the id
+        scopus_scopusid                         = abstract["prism:url"]
+        scopus_scopusid                         = replace(scopus_scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
+        authored_abstracts[i].scopus_scopusid   = parse(Int, scopus_scopusid)
+        ## Setting the DOI if it's present
+        authored_abstracts[i].doi               = get(abstract, "prism:doi", nothing)
     end
     
     # Saving the response to a file
@@ -225,6 +223,7 @@ function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
     open(fpath, "w") do file
         write(file, response)
     end
+    @info "ScopusSearch API response written to "*fpath
 
     return authored_abstracts
 end
