@@ -180,6 +180,9 @@ end
 """
 - write!
 
+Issues:
+- It's allocating more space than it needs. Final vector has lots of #undef.
+
 Tasks:
 - Iterate over the list of received objects and populate the Vector{Abstract}
 - Do a double check wheater the received abstracts indeed are authored by the given author
