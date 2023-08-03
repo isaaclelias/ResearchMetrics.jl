@@ -229,12 +229,24 @@ function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
 end
 
 """
-    getAuthorsFromCSV()
+    getScopusCitingAbstracts(::Abstract)::Vector{Abstract}
 
-Querys the database to obtain a list of scientist ids.
+Queries scopus for a list of abstracts that cite the given abstract
 """
-function getAuthorsFromCSV(file::String)::Vector{Author}
-    @warn "getAuthorsFromCSV() not implemented"
+function getScopusCitingAbstracts(abstract::Abstract)#::Vector{Abstract}
+    @warn "getScopusCitingAbstracts not implemented"
+    # Preparing API 
+    endpoint = "https://api.elsevier.com/content/search/scopus"
+    headers = [
+               "Accept" => "application/json",
+               "X-ELS-APIKey" => scopus_api_key
+              ]
+    #query_string = "REFEID($(abstract.scopus_scopusid))" # APIKey doesn't have privileges
+    query_string = "REFEID($(abstract.scopus_scopusid))"
+    params = ["query" => query_string]
+    @info "Querying Scopus Search for arcticles that cite" abstract.title
+    response = HTTP.get(endpoint, headers; query=params).body |> String
+    response_parse = JSON.parse(response)
 end
 
 """
