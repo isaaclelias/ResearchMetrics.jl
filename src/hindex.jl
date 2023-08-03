@@ -137,14 +137,44 @@ end
 Uses the Scopus Abstract Retrieval API to get data.
 """
 function setScopusData!(abstract::Abstract)
-     # Preparing API 
+    # Checking if we have the needed information for the query
+    if something(abstract.scopus_scopusid)
+        query_string = string(abstract.scopus_scopusid)
+    else
+        @error "Missing needed information for query"
+    end
+
+    # Preparing API 
     endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
-    query_string = abstract.scopus
-    @info "Querying Scopus for abstracts by" author
-    response = HTTP.get(endpoint, headers; query=params).body |> String
-    response_parse = JSON.parse(response) 
+    headers = [
+               "Accept" => "application/json",
+               "X-ELS-APIKey" => scopus_api_key
+              ]
+    @info "Querying Scopus Abstract Retrieval API" abstract.scopus_scopusid 
+    response = HTTP.get(endpoint*query_string, headers).body |> String
+    response_parse = JSON.parse(response)
+    response_parse = response_parse["abstracts-retrieval-response"]
 
+    # Saving the response to a file
+    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
+    fname = "Scopus-AbstractRetrieval"*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*query_sha*".json"
+    dirpath = api_query_folder
+    fpath = dirpath*fname
+    touch(fpath)
+    open(fpath, "w") do file
+        write(file, response)
+    end
+    @info "Abstract Retrieval response written to "*fpath
 
+    # Setting the fields
+    abstract.title = response_parse["coredata"]["dc:title"]
+    abstract.date = Date(response_parse["coredata"]["prism:coverDate"])
+    ## Authors
+    n_authors = length(response_parse["authors"]["author"])
+    abstract.scopus_authids = Vector{Int}(undef, n_authors)
+    for (i, author) in enumerate(response_parse["authors"]["author"])
+        abstract.scopus_authids[i] = parse(Int, author["@auid"])
+    end
 end
 
 """
