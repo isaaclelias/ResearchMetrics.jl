@@ -189,7 +189,7 @@ end
 Tasks:
 - Better names for the variables please
 """
-function setScopusHIndex(author::Author)::Nothing
+function setScopusHIndex!(author::Author)::Nothing
     abstracts = author.scopus_abstracts
 
     # Getting a list of all publication dates

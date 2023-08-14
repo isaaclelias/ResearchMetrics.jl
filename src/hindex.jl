@@ -45,7 +45,8 @@ function localQuery(query_string::String)::String
     what_we_have = readdir(api_query_folder)
     query_sha = first(bytes2hex(sha256(query_string)), sha_length)
     if r"*.-*.-$(query_sha).json" in what_we_have
-      file = open()
+        file = open()
+    end
 end
 
 """
