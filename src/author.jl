@@ -1,14 +1,24 @@
+include("abstract.jl")
+
 """
 Stores informations about the author based on a database query.
 
 Fields meaning
 - `query_name`: name used for querying the database
 - `query_affiliation`: institution used for querying the database 
+
+Tasks:
+- Refactor `scopus_FIELD` to `FIELD`
 """
 mutable struct Author
     # Query data
     query_name::Union{String, Nothing}
     query_affiliation::Union{String, Nothing}
+
+    # Basic info
+    firstname::Union{String, Nothing}
+    lastname::Union{String, Nothing}
+    affiliation::Union{String, Nothing}
 
     # Scopus
     scopus_authid::Union{Int, Nothing}

@@ -10,9 +10,15 @@ mutable struct Abstract
     scopus_scopusid::Union{Int, Nothing}
     scopus_eid::Union{String, Nothing}
     scopus_authids::Union{Vector{Int}, Nothing}
-    #is_in_scopus::Union{Bool, Nothing}
     scopus_citations::Union{Vector{Abstract}, Nothing}
     scopus_citation_count::Union{TimeArray, Nothing}
+
+    # Scholar
+    scholar_citesid::Union{Int, Nothing}
+
+    # Where is it listed?
+    found_in_scopus::Union{Bool, Nothing}
+    found_in_scholar::Union{Bool, Nothing}
     
     # Empty constructor sets all fields to nothing
     function Abstract()

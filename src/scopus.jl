@@ -1,3 +1,11 @@
+export setScopusApiKey
+
+const scopus_api_key::Union{String, Nothing} = nothing
+
+function setScopusApiKey(api_key::String)::Nothing
+    scopus_api_key = api_key
+end
+
 """
     setScopusSearchData!(::Author)::Nothing
 """

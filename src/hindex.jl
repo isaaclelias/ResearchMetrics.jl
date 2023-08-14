@@ -25,16 +25,15 @@ using Dates
 using SHA
 using Dates
 
+include("author.jl")
+include("abstract.jl")
+include("scopus.jl")
+
 export Author, Abstract
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts
 
-print("Enter the Scopus API key: "); scopus_api_key = String(readline())
 sha_length = 20
 api_query_folder = "output/extern/"
-
-include("src/author.jl")
-include("src/abstract.jl")
-include("src/scopus.jl")
 
 """
     localQuery(::String)::String
