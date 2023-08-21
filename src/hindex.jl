@@ -29,6 +29,7 @@ include("author.jl")
 include("abstract.jl")
 include("scopus.jl")
 include("scholar.jl")
+include("secrets.jl")
 
 export Author, Abstract
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts

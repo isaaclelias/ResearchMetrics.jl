@@ -1,6 +1,7 @@
+include("secrets.jl")
+
 export setSerapiApiKey, setScholarBasicFields!
 
-print("Serapi API Key: "); serapi_api_key = readline()
 serapi_fprefix = "Serapi-GoogleScholar"
 
 @debug serapi_api_key
@@ -36,14 +37,7 @@ end
 Implementation details:
 - `query_string` is formatted here
 """
-function querySerapiGScholar(abstract::Abstract)#::String
-    # Do we have the data?
-    if !isnothing(abstract.doi)
-        query_string = abstract.doi
-    else
-        @error "Not enough information to Scholar's basic fields"
-    end
-
+function querySerapiGScholar(query_string::String)::String
     local_query = localQuery(serapi_fprefix, query_string)
     if !isnothing(local_query)
         return local_query
@@ -60,6 +54,8 @@ Basic fields:
 """
 function setBasicFieldsFromSerapiGScholar!(abstract::Abstract)::Nothing
     @debug "Setting Scholar basic fields for" query_sha
+
+    query_string = abstract.doi
 
     response = JSON.parse(querySerapiGScholar(abstract))
     abstract.scholar_citesid = parse(Int, response["organic_results"]["inline_links"]["cited_by"]["cites_id"])

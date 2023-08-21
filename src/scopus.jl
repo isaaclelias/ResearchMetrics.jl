@@ -1,26 +1,43 @@
+include("secrets.jl")
+
 export setScopusApiKey, setScopusSearchData!
 
-const scopus_api_key::Union{String, Nothing} = nothing
+scopusAuthorSearch_fprefix = "Scopus-AuthorSearch"
+scopusAbstractRetrieval_fprefix = "Scopus-AbstractRetrieval"
+scopusSearch_fprefix = "Scopus-Search"
 
 function setScopusApiKey(api_key::String)::Nothing
     scopus_api_key = api_key
 end
 
-"""
-    setScopusSearchData!(::Author)::Nothing
-"""
-function setBasicInfoFromScopus!(author::Author)
-    # Preparing API 
+function remoteQueryScopusAuthorSearch(query_string::String)
+     # Preparing API 
     endpoint = "https://api.elsevier.com/content/search/author"
     headers = [
                "Accept" => "application/json",
                "X-ELS-APIKey" => String(scopus_api_key)
               ]
-    query_string = "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"
     params = ["query" => query_string]
-    @info "Querying Scopus for" author.query_name author.query_affiliation
-    @time response = HTTP.get(endpoint, headers; query=params).body |> String
-    response_parse = JSON.parse(response)
+    response = HTTP.get(endpoint, headers, query=params).body |> String
+    saveQuery(scopusAuthorSearch_fprefix, query_string, response)
+    return response
+end
+
+function queryScopusAuthorSearch(query_string::String)::String
+    local_query = localQuery(scopusAuthorSearch_fprefix, query_string)
+    if !isnothing(local_query)
+        return local_query
+    else
+        return remoteQueryScopusAuthorSearch(query_string)    
+    end
+end
+
+"""
+    setScopusSearchData!(::Author)::Nothing
+"""
+function setBasicInfoFromScopus!(author::Author)::Nothing
+    query_string = "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"
+    response = queryScopusAuthorSearch(query_string)
 
     # Setting the Author values
     author.scopus_firstname         = response_parse["search-results"]["entry"][1]["preferred-name"]["given-name"]
@@ -35,18 +52,27 @@ function setBasicInfoFromScopus!(author::Author)
     scopus_authid                   = replace(scopus_authid, r"https://api.elsevier.com/content/author/author_id/"=>"")
     author.scopus_authid            = parse(Int, scopus_authid)
 
-    # Saving the response to a file
-    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
-    fname = "Scopus-AuthorSearch"*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*query_sha*".json"
-    dirpath = api_query_folder
-    fpath = dirpath*fname
-    touch(fpath)
-    open(fpath, "w") do file
-        write(file, response)
-    end
+    return nothing
+end
 
-    # Logging
-    @info "Received data from Scopus:" author.scopus_lastname author.scopus_firstname author.scopus_authid author.scopus_affiliation_name author.scopus_affiliation_id
+function queryScopusAbstractRetrieval(query_string::String)
+    localQuery = localQuery(scopusAbstractRetrieval_fprefix, query_string)
+    if !isnothing(localQuery)
+        return localQuery
+    else
+        # Preparing API 
+        endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
+        headers = [
+                   "Accept" => "application/json",
+                  "X-ELS-APIKey" => scopus_api_key
+                  ]
+        @info "Querying Scopus Abstract Retrieval API" abstract.scopus_scopusid 
+        response = HTTP.get(endpoint*query_string, headers).body |> String
+
+        saveQuery(scopusAbstractRetrieval_fprefix, query_string)
+
+        return response
+    end
 end
 
 """
@@ -54,35 +80,11 @@ end
 
 Uses the Scopus Abstract Retrieval API to get data.
 """
-function setBasicInfoFromScopus!(abstract::Abstract)
-    # Checking if we have the needed information for the query
-    if !isnothing(abstract.scopus_scopusid)
-        query_string = string(abstract.scopus_scopusid)
-    else
-        @error "Missing needed information for query"
-    end
-
-    # Preparing API 
-    endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
-    headers = [
-               "Accept" => "application/json",
-               "X-ELS-APIKey" => scopus_api_key
-              ]
-    @info "Querying Scopus Abstract Retrieval API" abstract.scopus_scopusid 
-    response = HTTP.get(endpoint*query_string, headers).body |> String
+function setBasicInfoFromScopus!(abstract::Abstract)::Nothing
+    query_string = abstract.scopus_scopusid
+    response = queryScopusAbstractRetrieval(query_string)
     response_parse = JSON.parse(response)
     response_parse = response_parse["abstracts-retrieval-response"]
-
-    # Saving the response to a file
-    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
-    fname = "Scopus-AbstractRetrieval"*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*query_sha*".json"
-    dirpath = api_query_folder
-    fpath = dirpath*fname
-    touch(fpath)
-    open(fpath, "w") do file
-        write(file, response)
-    end
-    @info "Abstract Retrieval response written to "*fpath
 
     # Setting the fields
     abstract.title = response_parse["coredata"]["dc:title"]
@@ -93,6 +95,28 @@ function setBasicInfoFromScopus!(abstract::Abstract)
     for (i, author) in enumerate(response_parse["authors"]["author"])
         abstract.scopus_authids[i] = parse(Int, author["@auid"])
     end
+
+    return nothing
+end
+
+function queryScopusSearch(query_string::String)::String
+    local_query = local_query(scopusSearch_fprefix, query_string)
+    if !isnothing(local_query)
+        return local_query
+    else
+        # Preparing API 
+        endpoint = "https://api.elsevier.com/content/search/scopus"
+        headers = [
+                   "Accept" => "application/json",
+                   "X-ELS-APIKey" => scopus_api_key
+                  ]
+        params = ["query" => query_string]
+        @info "Querying Scopus for abstracts by" author
+        response = HTTP.get(endpoint, headers; query=params).body |> String
+        saveQuery(scopusSearch_fprefix, query_string, response)
+    end
+
+    return response
 end
 
 """
@@ -106,16 +130,8 @@ Tasks:
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
 function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
-    # Preparing API 
-    endpoint = "https://api.elsevier.com/content/search/scopus"
-    headers = [
-               "Accept" => "application/json",
-               "X-ELS-APIKey" => scopus_api_key
-              ]
     query_string = "AU-ID($(author.scopus_authid))"
-    params = ["query" => query_string]
-    @info "Querying Scopus for abstracts by" author
-    response = HTTP.get(endpoint, headers; query=params).body |> String
+    response = queryScopusSearch(query_string)
     response_parse = JSON.parse(response)
     
     # Setting the values
@@ -135,17 +151,6 @@ function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
         authored_abstracts[i].doi               = get(abstract, "prism:doi", nothing)
     end
     
-    # Saving the response to a file
-    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
-    fname = "Scopus-ScopusSearch"*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*query_sha*".json"
-    dirpath = api_query_folder
-    fpath = dirpath*fname
-    touch(fpath)
-    open(fpath, "w") do file
-        write(file, response)
-    end
-    @info "ScopusSearch API response written to "*fpath
-
     return authored_abstracts
 end
 

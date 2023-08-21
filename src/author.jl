@@ -57,6 +57,10 @@ function getAuthorsFromCSV(file::String)::Vector{Author}
     @warn "getAuthorsFromCSV() not implemented"
 end
 
+function setBasicInfo!(author::Author)::Nothing
+    setBasicInfoFromScopus!(author)
+end
+
 function setAuthoredAbstracts!(author::Author)::Nothing
     author.abstracts = getScopusAuthoredAbstracts(author)
 end

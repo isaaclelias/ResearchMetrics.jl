@@ -11,16 +11,22 @@ logger = SimpleLogger(stdout, Logging.Debug)
 global_logger(logger)
 
 @test begin
-    abstract = Abstract()
-    abstract.doi = "10.1007/s11192-005-0281-4"
-    setBasicInfo!(abstract)
-    true
-end
-
-@test begin
     author = Author("hasse", "technische universitat darmstadt")
+
     setBasicInfo!(author)
+    print(author)
+
     setAuthoredAbstracts!(author)
+    print(author)
+
     setCitations!(author)
+    print(author)
+
     setCitationsBasicInfo!(author)
+    print(author)
+
+    setHIndex!(author)
+    print(author)
+
+    plot(author.hindex)
 end
