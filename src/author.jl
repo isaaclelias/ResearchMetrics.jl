@@ -1,5 +1,8 @@
 include("abstract.jl")
 
+export Author
+export setAuthoredAbstracts
+
 """
 Stores informations about the author based on a database query.
 
@@ -21,6 +24,7 @@ mutable struct Author
     affiliation::Union{String, Nothing}
 
     # Scopus
+    ## Basic info
     scopus_authid::Union{Int, Nothing}
     scopus_firstname::Union{String, Nothing}
     scopus_lastname::Union{String, Nothing}
@@ -28,8 +32,9 @@ mutable struct Author
     scopus_affiliation_id::Union{String, Nothing}
     scopus_query_nresults::Union{String, Nothing}
     scopus_query_string::Union{String, Nothing}
-    scopus_abstracts::Union{Vector{Abstract}, Nothing}
     scopus_hindex::Union{TimeArray, Nothing}
+    ## Authored
+    scopus_abstracts::Union{Vector{Abstract}, Nothing}
 
     # ORCID
     orcid_id::Union{String, Nothing}
@@ -52,4 +57,6 @@ function getAuthorsFromCSV(file::String)::Vector{Author}
     @warn "getAuthorsFromCSV() not implemented"
 end
 
-
+function setAuthoredAbstracts!(author::Author)::Nothing
+    author.abstracts = getScopusAuthoredAbstracts(author)
+end

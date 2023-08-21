@@ -1,4 +1,4 @@
-export setScopusApiKey
+export setScopusApiKey, setScopusSearchData!
 
 const scopus_api_key::Union{String, Nothing} = nothing
 
@@ -9,7 +9,7 @@ end
 """
     setScopusSearchData!(::Author)::Nothing
 """
-function setScopusSearchData!(author::Author)
+function setBasicInfoFromScopus!(author::Author)
     # Preparing API 
     endpoint = "https://api.elsevier.com/content/search/author"
     headers = [
@@ -54,9 +54,9 @@ end
 
 Uses the Scopus Abstract Retrieval API to get data.
 """
-function setScopusSearchData!(abstract::Abstract)
+function setBasicInfoFromScopus!(abstract::Abstract)
     # Checking if we have the needed information for the query
-    if something(abstract.scopus_scopusid)
+    if !isnothing(abstract.scopus_scopusid)
         query_string = string(abstract.scopus_scopusid)
     else
         @error "Missing needed information for query"

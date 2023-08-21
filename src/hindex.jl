@@ -28,12 +28,17 @@ using Dates
 include("author.jl")
 include("abstract.jl")
 include("scopus.jl")
+include("scholar.jl")
 
 export Author, Abstract
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts
 
 sha_length = 20
-api_query_folder = "output/extern/"
+api_query_folder = "resources/extern/"
+
+function queryID(query_string::String)::String
+    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
+end
 
 """
     localQuery(::String)::String
@@ -41,12 +46,21 @@ api_query_folder = "output/extern/"
 CURRENTLY WORKING ON
 NOT TESTED
 """
-function localQuery(query_string::String)::String
+function localQuery(query_type::String, query_string::String)::Union{String, Nothing}
+    regex = Regex(query_type*"-.*-"*queryID(query_string))
     what_we_have = readdir(api_query_folder)
-    query_sha = first(bytes2hex(sha256(query_string)), sha_length)
-    if r"*.-*.-$(query_sha).json" in what_we_have
-        file = open()
-    end
+    what_we_have = filter(s-> occursin(regex, s), what_we_have)
+    @debug "Files found matching the query" length(what_we_have)
+    if !isempty(what_we_have)
+        @debug "Using info from the disk"
+        sort!(what_we_have)
+        open(api_query_folder*what_we_have[1], "r") do file
+            print(read(file, String))
+            response_parse = JSON.parse(read(file, String))
+        end
+    else
+        return nothing
+    end 
 end
 
 """
@@ -54,8 +68,13 @@ end
 
 Saves the result to disk.
 """
-function saveQuery(query_type::String, query_string::String)::Nothing
-
+function saveQuery(query_type::String, query_string::String, response::String)::Nothing
+    fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*queryID(query_string)*".json"
+    fpath = api_query_folder*fname
+    touch(fpath)
+    open(fpath, "w") do file
+        write(file, response)
+    end
 end
 
 """
