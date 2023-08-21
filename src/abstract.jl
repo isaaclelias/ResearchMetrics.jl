@@ -15,7 +15,7 @@ mutable struct Abstract
     scopus_citations::Union{Vector{Abstract}, Nothing}
     scopus_citation_count::Union{TimeArray, Nothing}
 
-    # Scholar661347f2079f97d08567078d659bf462c8c86f5f8eaef71498e5bbf
+    # Scholar
     scholar_citesid::Union{Int, Nothing}
 
     # Where is it listed?
