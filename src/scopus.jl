@@ -1,4 +1,5 @@
 include("secrets.jl")
+include("local.jl")
 
 export setScopusApiKey, setScopusSearchData!
 
@@ -27,16 +28,24 @@ end
 """
     setScopusSearchData!(::Author)::Nothing
 """
-function setBasicInfoFromScopus!(author::Author)::Nothing
+function setBasicInfoFromScopus!(author::Author; only_local::Bool=false)::Nothing
+    @info "Setting basic information for" author.query_name author.query_affiliation
     query_string = "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"
-    response = queryScopusAuthorSearch(query_string)
+    local_query = localQuery(scopusAuthorSearch_fprefix, query_string)
+    response = ""
+    if isnothing(local_query)
+        response = queryScopusAuthorSearch(query_string)
+    else
+        response = local_query
+    end
+    response_parse = JSON.parse(response)
 
     # Setting the Author values
     author.scopus_firstname         = response_parse["search-results"]["entry"][1]["preferred-name"]["given-name"]
     author.scopus_lastname          = response_parse["search-results"]["entry"][1]["preferred-name"]["surname"]
     author.scopus_affiliation_id    = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-id"]
     author.scopus_affiliation_name  = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
-    author.orcid_id                 = response_parse["search-results"]["entry"][1]["orcid"]
+    #author.orcid_id                 = response_parse["search-results"]["entry"][1]["orcid"]
     author.scopus_query_nresults    = response_parse["search-results"]["opensearch:totalResults"]
     author.scopus_query_string      = query_string
     ## Triming the authors url to get the id
@@ -47,23 +56,35 @@ function setBasicInfoFromScopus!(author::Author)::Nothing
     return nothing
 end
 
-function queryScopusAbstractRetrieval(query_string::String)
-    localQuery = localQuery(scopusAbstractRetrieval_fprefix, query_string)
-    if !isnothing(localQuery)
-        return localQuery
-    else
-        # Preparing API 
+function queryScopusAbstractRetrieval(query_string::String; only_local::Bool=false)::Union{String, Nothing}
+    response = ""
+    local_query = localQuery(scopusAbstractRetrieval_fprefix, query_string)
+    if !isnothing(local_query)
+        @info "Scopus Abstract Retrieval found locally" query_string
+        return local_query
+    elseif !only_local && !queryKnownToFault(scopusAbstractRetrieval_fprefix, query_string)
+        # Preparing API
+        @info "Requesting Scopus Abstract Retrieval API" query_string
         endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
         headers = [
                    "Accept" => "application/json",
                   "X-ELS-APIKey" => scopus_api_key
                   ]
-        @info "Querying Scopus Abstract Retrieval API" abstract.scopus_scopusid 
-        response = HTTP.get(endpoint*query_string, headers).body |> String
+        try
+            response = HTTP.get(endpoint*query_string, headers).body |> String
+        catch y
+            if isa(y, HTTP.StatusError)
+                @error "HTTP StatusError on Scopus Abstract Retrieval" 
+                addQueryKnownToFault(scopusAbstractRetrieval_fprefix, query_string)
+                return nothing
+            end
+        end
 
-        saveQuery(scopusAbstractRetrieval_fprefix, query_string)
+        saveQuery(scopusAbstractRetrieval_fprefix, query_string, response)
 
         return response
+    else
+        return nothing
     end
 end
 
@@ -72,43 +93,85 @@ end
 
 Uses the Scopus Abstract Retrieval API to get data.
 """
-function setBasicInfoFromScopus!(abstract::Abstract)::Nothing
-    query_string = abstract.scopus_scopusid
-    response = queryScopusAbstractRetrieval(query_string)
+function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
+    @info "Setting basic information for" abstract.title
+
+    # Does it have a scopusid set? If not:
+    if isnothing(abstract.scopus_scopusid)
+        response = queryScopusSearch(abstract.title, only_local=only_local)
+        if isnothing(response)
+            @error "Couldn't find scopus_id" abstract.title
+            return nothing
+        end
+        response_parse = JSON.parse(response)
+        if haskey(response_parse["search-results"]["entry"][1], "prism:url")
+            scopusid = response_parse["search-results"]["entry"][1]["prism:url"]
+            scopusid = replace(scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
+            abstract.scopus_scopusid = parse(Int, scopusid)
+        else
+            @error "Couldn't find information on Scopus Search for" abstract.title
+            return nothing
+        end
+    end
+
+    query_string = string(abstract.scopus_scopusid)
+    response = queryScopusAbstractRetrieval(query_string, only_local=only_local)
+    if isnothing(response)
+        @error "Couldn't set information on Scopus Abstract Retrieval" abstract.title
+        return nothing
+    end
     response_parse = JSON.parse(response)
     response_parse = response_parse["abstracts-retrieval-response"]
 
     # Setting the fields
     abstract.title = response_parse["coredata"]["dc:title"]
-    abstract.date = Date(response_parse["coredata"]["prism:coverDate"])
+    abstract.date_pub = Date(response_parse["coredata"]["prism:coverDate"])
     ## Authors
+    if isnothing(response_parse["authors"])
+        @error "No authids found on response" abstract.title
+    end
     n_authors = length(response_parse["authors"]["author"])
     abstract.scopus_authids = Vector{Int}(undef, n_authors)
     for (i, author) in enumerate(response_parse["authors"]["author"])
         abstract.scopus_authids[i] = parse(Int, author["@auid"])
     end
 
+    @debug "Basic information set" abstract.title abstract.date_pub abstract.scopus_authids
+
     return nothing
 end
 
-function queryScopusSearch(query_string::String)::String
-    local_query = local_query(scopusSearch_fprefix, query_string)
+function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool)::Union{String, Nothing}
+    local_query = localQuery(scopusSearch_fprefix, query_string*"$start")
     if !isnothing(local_query)
+        @info "Scopus Search found locally" query_string
         return local_query
     else
+        if only_local | queryKnownToFault(scopusSearch_fprefix, query_string*"$start")
+            return nothing
+        end
         # Preparing API 
         endpoint = "https://api.elsevier.com/content/search/scopus"
         headers = [
                    "Accept" => "application/json",
                    "X-ELS-APIKey" => scopus_api_key
                   ]
-        params = ["query" => query_string]
-        @info "Querying Scopus for abstracts by" author
-        response = HTTP.get(endpoint, headers; query=params).body |> String
-        saveQuery(scopusSearch_fprefix, query_string, response)
+        params = [
+                  "query" => query_string,
+                  "start" => "$start"
+                  ]
+        try
+            response = HTTP.get(endpoint, headers; query=params).body |> String
+            return response
+        catch y
+            if isa(y, HTTP.Exceptions.StatusError)
+                @error "HTTP StatusError for Scopus Search" query_string*"$start"
+                addQueryKnownToFault(scopusSearch_fprefix, query_string*"$start")
+                return nothing
+            end
+        end
+        saveQuery(scopusSearch_fprefix, query_string*"$start", response)
     end
-
-    return response
 end
 
 """
@@ -121,31 +184,44 @@ Tasks:
 - Iterate over the list of received objects and populate the Vector{Abstract}
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
-function getScopusAuthoredAbstracts(author::Author)::Vector{Abstract}
+function getScopusAuthoredAbstracts(author::Author; only_local::Bool=false)::Vector{Abstract}
     query_string = "AU-ID($(author.scopus_authid))"
-    response = queryScopusSearch(query_string)
-    response_parse = JSON.parse(response)
-    
-    # Setting the values
-    n_abstracts = parse(Int, response_parse["search-results"]["opensearch:totalResults"])
-    @info n_abstracts
-    authored_abstracts = Vector{Abstract}(undef, n_abstracts)
-    # debugging
-    for (i, abstract) in enumerate(response_parse["search-results"]["entry"])
-        # Setting the fields
-        authored_abstracts[i]                   = Abstract() # initializing the struct
-        authored_abstracts[i].title
-        ## Triming the abstract url to get the id
-        scopus_scopusid                         = abstract["prism:url"]
-        scopus_scopusid                         = replace(scopus_scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
-        authored_abstracts[i].scopus_scopusid   = parse(Int, scopus_scopusid)
-        ## Setting the DOI if it's present
-        authored_abstracts[i].doi               = get(abstract, "prism:doi", nothing)
+    start = 0
+    authored_abstracts = Vector{Abstract}()
+    while true
+        response = queryScopusSearch(query_string, start, only_local=only_local)
+        response_parse = JSON.parse(response)
+        # Setting the values
+        # debugging
+        if !haskey(response_parse["search-results"], "entry")
+            @error "No entries found on Scopus Search answer" query_string*" start=$start"
+            break
+        end
+        for (i, result) in enumerate(response_parse["search-results"]["entry"])
+            abstract = Abstract(result["dc:title"])
+            # Setting the fields
+            ## Triming the abstract url to get the id
+            scopus_scopusid                         = result["prism:url"]
+            scopus_scopusid                         = replace(scopus_scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
+            abstract.scopus_scopusid   = parse(Int, scopus_scopusid)
+            ## Setting the DOI if it's present
+            #abstract.doi               = result["prism:doi"]
+            setBasicInfo!(abstract, only_local=only_local)
+            push!(authored_abstracts, abstract)
+        end
+        # Do we need to query again?
+        n_result = length(response_parse["search-results"]["entry"])
+        start = start+n_result
+        n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
+        if start >= n_result_total
+            break
+        end
+        @info "Querying for another Scopus Search results page"
     end
-    
     return authored_abstracts
 end
 
+#=
 """
     getScopusCitingAbstracts(::Abstract)::Vector{Abstract}
 
@@ -168,6 +244,7 @@ function setScopusCitingAbstracts(abstract::Abstract)#::Vector{Abstract}
 
     #abstract.citations = ::Vector{Abstract}
 end
+=#
 
 function setScopusCitationCount(abstract::Abstract)::Nothing
     if isnothing(abstract.scopus_citations)
@@ -187,22 +264,30 @@ Tasks:
 - Better names for the variables please
 """
 function setScopusHIndex!(author::Author)::Nothing
-    abstracts = author.scopus_abstracts
+    abstracts = author.abstracts
 
     # Getting a list of all publication dates
     all_citation_dates = Vector{Date}()
     for abstract in abstracts
-        append!(all_citation_dates, getCitationDates(abstract))
+        if isnothing(abstract.scopus_citation_count)
+            setCitationCount!(abstract)
+        end
+        citation_dates = getCitationDates(abstract)
+        if !isnothing(citation_dates)
+            append!(all_citation_dates, citation_dates)
+        end
     end
-    sort!(pub_dates)
+    sort!(all_citation_dates)
 
     hindex_current = 0
-    hindex_values = Vector{Int}
-    hindex_dates = Vector{Date}
+    hindex_values = Vector{Int}()
+    hindex_dates = Vector{Date}()
     for date in all_citation_dates
         citation_count_per_abstract = Vector{Int}()
         for abstract in abstracts
-            push!(citation_count_per_abstract, to(abstract.scopus_citation_count, date)[end])
+            if !isnothing(abstract.scopus_citation_count) && length(values(to(abstract.scopus_citation_count, date))) > 0
+                push!(citation_count_per_abstract, values(to(abstract.scopus_citation_count, date))[end])
+            end
         end
         hindex_at_date = calcHIndex(citation_count_per_abstract)
         if hindex_at_date > hindex_current
@@ -214,6 +299,8 @@ function setScopusHIndex!(author::Author)::Nothing
 
     hindex = TimeArray(hindex_dates, hindex_values)
     author.scopus_hindex = hindex
+    
+    return nothing
 end
 
 

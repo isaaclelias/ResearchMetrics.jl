@@ -1,7 +1,7 @@
 include("abstract.jl")
 
 export Author
-export setAuthoredAbstracts
+export setAuthoredAbstracts!, setCitations!
 
 """
 Stores informations about the author based on a database query.
@@ -23,6 +23,8 @@ mutable struct Author
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
 
+    abstracts::Union{Vector{Abstract}, Nothing}
+
     # Scopus
     ## Basic info
     scopus_authid::Union{Int, Nothing}
@@ -34,7 +36,6 @@ mutable struct Author
     scopus_query_string::Union{String, Nothing}
     scopus_hindex::Union{TimeArray, Nothing}
     ## Authored
-    scopus_abstracts::Union{Vector{Abstract}, Nothing}
 
     # ORCID
     orcid_id::Union{String, Nothing}
@@ -57,10 +58,25 @@ function getAuthorsFromCSV(file::String)::Vector{Author}
     @warn "getAuthorsFromCSV() not implemented"
 end
 
-function setBasicInfo!(author::Author)::Nothing
-    setBasicInfoFromScopus!(author)
+function setBasicInfo!(author::Author; only_local::Bool=false)::Nothing
+    setBasicInfoFromScopus!(author, only_local=only_local)
 end
 
-function setAuthoredAbstracts!(author::Author)::Nothing
-    author.abstracts = getScopusAuthoredAbstracts(author)
+function setAuthoredAbstracts!(author::Author; only_local::Bool=false)::Nothing
+    author.abstracts = getScopusAuthoredAbstracts(author, only_local=only_local)
+    return nothing
+end
+
+function setCitations!(author::Author; only_local::Bool=false)::Nothing
+    @debug length(author.abstracts)
+    for i in 1:length(author.abstracts)
+        setCitations!(author.abstracts[i], only_local=only_local)
+    end
+    return nothing
+end
+
+function setCitationsBasicInfo!(author::Author; only_local::Bool=false)::Nothing
+    for i in 1:length(author.abstracts)
+        setCitationsBasicInfo!(author.abstracts[i], only_local=only_local)
+    end
 end

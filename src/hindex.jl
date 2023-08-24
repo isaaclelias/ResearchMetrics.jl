@@ -32,7 +32,7 @@ include("scholar.jl")
 include("secrets.jl")
 
 export Author, Abstract
-export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts
+export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, setHIndex!, queryID
 
 sha_length = 20
 api_query_folder = "resources/extern/"
@@ -41,28 +41,7 @@ function queryID(query_string::String)::String
     query_sha = first(bytes2hex(sha256(query_string)), sha_length)
 end
 
-"""
-    localQuery(::String)::String
-
-CURRENTLY WORKING ON
-NOT TESTED
-"""
-function localQuery(query_type::String, query_string::String)::Union{String, Nothing}
-    regex = Regex(query_type*"-.*-"*queryID(query_string))
-    what_we_have = readdir(api_query_folder)
-    what_we_have = filter(s-> occursin(regex, s), what_we_have)
-    @debug "Files found matching the query" length(what_we_have)
-    if !isempty(what_we_have)
-        @debug "Using info from the disk"
-        sort!(what_we_have)
-        open(api_query_folder*what_we_have[1], "r") do file
-            print(read(file, String))
-            response_parse = JSON.parse(read(file, String))
-        end
-    else
-        return nothing
-    end 
-end
+include("local.jl")
 
 """
     saveQuery(query_type::String, query_string::String)::Nothing
@@ -75,7 +54,10 @@ function saveQuery(query_type::String, query_string::String, response::String)::
     touch(fpath)
     open(fpath, "w") do file
         write(file, response)
+        @debug "Query saved to" fpath
     end
+
+    return nothing
 end
 
 """
@@ -118,6 +100,11 @@ function calcHIndex(citation_count::Vector{Int})::Int
     end
 
     return h_index
+end
+
+function setHIndex!(author::Author)::Nothing
+    setScopusHIndex!(author)
+    return nothing
 end
 
 end #module
