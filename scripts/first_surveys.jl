@@ -8,7 +8,7 @@ ENV["JULIA_DEBUG"] = HIndex
 io_path = "logs/hindex_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
 touch(io_path)
 io = open(io_path, "w+")
-logger = TeeLogger(ConsoleLogger(stdout, Logging.Debug),
+logger = TeeLogger(ConsoleLogger(stdout, Logging.Error),
                    SimpleLogger(io, Logging.Debug))
 global_logger(logger)
 
@@ -30,6 +30,7 @@ for author in authors
     setBasicInfo!(author, only_local=true)
     setAuthoredAbstracts!(author, only_local=true)
     setCitations!(author, only_local=true)
+    @debug "setCitationsBasicInfo starts here"
     setCitationsBasicInfo!(author)
     setHIndex!(author)
     hindex_plot = plot(author.scopus_hindex)

@@ -95,7 +95,7 @@ end
 Uses the Scopus Abstract Retrieval API to get data.
 """
 function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
-    @info "Setting basic information for" abstract.title
+    @debug "Setting basic information for" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:
     if isnothing(abstract.scopus_scopusid)
@@ -110,6 +110,7 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
             scopusid = response_parse["search-results"]["entry"][1]["prism:url"]
             scopusid = replace(scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
             abstract.scopus_scopusid = parse(Int, scopusid)
+            @debug "Scopus ID set succesfully?" abstract.title abstract.scopus_scopusid
         else
             @error "Couldn't find information on Scopus Search for" abstract.title
             return nothing
@@ -146,12 +147,11 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
     =#
     if haskey(response_parse["coredata"], "dc:creator")
         @debug "dc:creator style"
-    elseif haskey(response_parse["authors"], "author")
+    elseif haskey(response_parse, "authors") || haskey(response_parse["author"], "author")
         @debug "[authors][author] style"
     else
         @debug "new style"
     end
-
 
     @debug "Basic information set?" abstract.title abstract.date_pub abstract.scopus_authids
 
@@ -159,7 +159,7 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
 end
 
 function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool, in_a_hurry::Bool=false)::Union{String, Nothing}
-    #if !in_a_hurry; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
+    if !in_a_hurry && !only_local; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
     formatted_query_string = "$query_string"
     local_query = localQuery(scopusSearch_fprefix, formatted_query_string*"$start")
     if !isnothing(local_query)
