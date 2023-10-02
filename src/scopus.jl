@@ -1,7 +1,7 @@
 include("secrets.jl")
 include("local.jl")
 
-export setScopusApiKey, setScopusSearchData!
+export setScopusApiKey, setScopusSearchData!, getCitationDates
 
 scopusAuthorSearch_fprefix = "Scopus-AuthorSearch"
 scopusAbstractRetrieval_fprefix = "Scopus-AbstractRetrieval"
@@ -56,7 +56,8 @@ function setBasicInfoFromScopus!(author::Author; only_local::Bool=false)::Nothin
     return nothing
 end
 
-function queryScopusAbstractRetrieval(query_string::String; only_local::Bool=false)::Union{String, Nothing}
+function queryScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
+    if !in_a_hurry && !only_local; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
     response = ""
     local_query = localQuery(scopusAbstractRetrieval_fprefix, query_string)
     if !isnothing(local_query)
@@ -98,9 +99,10 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
 
     # Does it have a scopusid set? If not:
     if isnothing(abstract.scopus_scopusid)
-        response = queryScopusSearch(abstract.title, only_local=only_local)
+        query_string_title = "TITLE($(abstract.title))"
+        response = queryScopusSearch(query_string_title, only_local=only_local)
         if isnothing(response)
-            @error "Couldn't find scopus_id" abstract.title
+            @error "Couldn't find scopus_id" abstract.title query_string_title queryID(query_string_title)
             return nothing
         end
         response_parse = JSON.parse(response)
@@ -117,7 +119,7 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
     query_string = string(abstract.scopus_scopusid)
     response = queryScopusAbstractRetrieval(query_string, only_local=only_local)
     if isnothing(response)
-        @error "Couldn't set information on Scopus Abstract Retrieval" abstract.title
+        @error "Couldn't set information on Scopus Abstract Retrieval, no response from Scopus Abstract Retrieval" abstract.title abstract.scopus_scopusid queryID(query_string)
         return nothing
     end
     response_parse = JSON.parse(response)
@@ -127,24 +129,41 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
     abstract.title = response_parse["coredata"]["dc:title"]
     abstract.date_pub = Date(response_parse["coredata"]["prism:coverDate"])
     ## Authors
-    if isnothing(response_parse["authors"])
-        @error "No authids found on response" abstract.title
+    ### ["coredata"]
+    #=
+    if (!haskey(response_parse["coredata"], "authors") ||
+        !haskey(response_parse["authors"] ,"author") ||
+        )
+        @error "No authids found on response" abstract.title queryID(query_string)
+        return nothing
+    else
+        n_authors = length(response_parse["authors"]["author"])
+        abstract.scopus_authids = Vector{Int}(undef, n_authors)
+        for (i, author) in enumerate(response_parse["authors"]["author"])
+            abstract.scopus_authids[i] = parse(Int, author["@auid"])
+        end
     end
-    n_authors = length(response_parse["authors"]["author"])
-    abstract.scopus_authids = Vector{Int}(undef, n_authors)
-    for (i, author) in enumerate(response_parse["authors"]["author"])
-        abstract.scopus_authids[i] = parse(Int, author["@auid"])
+    =#
+    if haskey(response_parse["coredata"], "dc:creator")
+        @debug "dc:creator style"
+    elseif haskey(response_parse["authors"], "author")
+        @debug "[authors][author] style"
+    else
+        @debug "new style"
     end
 
-    @debug "Basic information set" abstract.title abstract.date_pub abstract.scopus_authids
+
+    @debug "Basic information set?" abstract.title abstract.date_pub abstract.scopus_authids
 
     return nothing
 end
 
-function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool)::Union{String, Nothing}
-    local_query = localQuery(scopusSearch_fprefix, query_string*"$start")
+function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool, in_a_hurry::Bool=false)::Union{String, Nothing}
+    #if !in_a_hurry; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
+    formatted_query_string = "$query_string"
+    local_query = localQuery(scopusSearch_fprefix, formatted_query_string*"$start")
     if !isnothing(local_query)
-        @info "Scopus Search found locally" query_string
+        @debug "Scopus Search found locally" query_string
         return local_query
     else
         if only_local | queryKnownToFault(scopusSearch_fprefix, query_string*"$start")
@@ -157,7 +176,7 @@ function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool)
                    "X-ELS-APIKey" => scopus_api_key
                   ]
         params = [
-                  "query" => query_string,
+                  "query" => formatted_query_string,
                   "start" => "$start"
                   ]
         try
@@ -170,7 +189,7 @@ function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool)
                 return nothing
             end
         end
-        saveQuery(scopusSearch_fprefix, query_string*"$start", response)
+        saveQuery(scopusSearch_fprefix, formatted_query_string*"$start", response)
     end
 end
 
@@ -265,20 +284,7 @@ Tasks:
 """
 function setScopusHIndex!(author::Author)::Nothing
     abstracts = author.abstracts
-
-    # Getting a list of all publication dates
-    all_citation_dates = Vector{Date}()
-    for abstract in abstracts
-        if isnothing(abstract.scopus_citation_count)
-            setCitationCount!(abstract)
-        end
-        citation_dates = getCitationDates(abstract)
-        if !isnothing(citation_dates)
-            append!(all_citation_dates, citation_dates)
-        end
-    end
-    sort!(all_citation_dates)
-
+    all_citation_dates = getCitationDates(author) # Getting a list of all publication dates
     hindex_current = 0
     hindex_values = Vector{Int}()
     hindex_dates = Vector{Date}()

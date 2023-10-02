@@ -1,8 +1,5 @@
 """
     localQuery(::String)::String
-
-CURRENTLY WORKING ON
-NOT TESTED
 """
 function localQuery(query_type::String, query_string::String)::Union{String, Nothing}
     regex = Regex(query_type*".*"*queryID(query_string))
@@ -47,4 +44,8 @@ function addQueryKnownToFault(query_type::String, query_string::String)::Nothing
         write(file, query_type*"-"*queryID(query_string)*" "*"\"$query_string\""*"\n")
     end
     return nothing
+end
+
+function formatAuthorSearchReport()
+    
 end

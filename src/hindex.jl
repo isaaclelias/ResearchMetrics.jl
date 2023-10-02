@@ -54,7 +54,7 @@ function saveQuery(query_type::String, query_string::String, response::String)::
     touch(fpath)
     open(fpath, "w") do file
         write(file, response)
-        @debug "Query saved to" fpath
+        @debug "Query saved to disk" fpath
     end
 
     return nothing
@@ -108,3 +108,10 @@ function setHIndex!(author::Author)::Nothing
 end
 
 end #module
+
+#=
+function setInfoForHIndexEvaluation(author::Author; only_local::Bool=false)::Nothing
+    @warn "Not implemented"
+    return nothing
+end
+=#

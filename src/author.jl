@@ -1,7 +1,7 @@
 include("abstract.jl")
 
 export Author
-export setAuthoredAbstracts!, setCitations!
+export setAuthoredAbstracts!, setCitations!, getCitationDates
 
 """
 Stores informations about the author based on a database query.
@@ -79,4 +79,20 @@ function setCitationsBasicInfo!(author::Author; only_local::Bool=false)::Nothing
     for i in 1:length(author.abstracts)
         setCitationsBasicInfo!(author.abstracts[i], only_local=only_local)
     end
+end
+
+function getCitationDates(author::Author)::Vector{Date}
+    all_citation_dates = Vector{Date}()
+    for abstract in author.abstracts
+        if isnothing(abstract.scopus_citation_count)
+            setCitationCount!(abstract)
+        end
+        citation_dates = getCitationDates(abstract)
+        @debug citation_dates
+        if !isnothing(citation_dates)
+            append!(all_citation_dates, citation_dates)
+        end
+    end
+    sort!(all_citation_dates)
+    return all_citation_dates
 end

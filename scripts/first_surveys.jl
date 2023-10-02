@@ -1,34 +1,20 @@
 include("../src/hindex.jl")
-
-#=
 using .HIndex
-
-ENV["JULIA_DEBUG"] = HIndex
-
-# Searching for an author
-hasse = Author("hasse", "technische universitat darmstadt")
-@time setScopusData!(hasse)
-
-# Getting his papers
-articles_hasse = getScopusAuthoredAbstracts(hasse)
-@time setScopusData!(articles_hasse[1])
-
-# Getting the paper that cites
-@time citing = getScopusCitingAbstracts(articles_hasse[1])
-@info citing
-=#
-
-using .HIndex
-using Logging
+using Dates
+using Logging, LoggingExtras
 using Plots
 
 ENV["JULIA_DEBUG"] = HIndex
-logger = SimpleLogger(stdout, Logging.Debug)
+io_path = "logs/hindex_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
+touch(io_path)
+io = open(io_path, "w+")
+logger = TeeLogger(ConsoleLogger(stdout, Logging.Debug),
+                   SimpleLogger(io, Logging.Debug))
 global_logger(logger)
 
 authors = [ 
     Author("hommelhoff", "universität erlangen-nürnberg") # Survey 2
-    Author("martínez-pinedo", "technische universitat darmstadt") # Survey 3
+    #Author("martínez-pinedo", "technische universitat darmstadt") # Survey 3
     #Author("andré", "universität augsburg") # Survey 4
     #Author("haddadin", "technische universität münchen") # Survey 5
     #Author("wessling", "rwth") # Survey 6
@@ -38,13 +24,13 @@ authors = [
     #Author("dreizler", "technische universität darmstadt") # Survey 9
     #Author("merklein", "universität erlangen-nürnberg") # Survey 8
     #Author("rosch", "universität zu köln") # Survey 7
-]
+] 
 
 for author in authors
-    setBasicInfo!(author, only_local=false)
-    setAuthoredAbstracts!(author, only_local=false)
+    setBasicInfo!(author, only_local=true)
+    setAuthoredAbstracts!(author, only_local=true)
     setCitations!(author, only_local=true)
-    setCitationsBasicInfo!(author, only_local=false)
+    setCitationsBasicInfo!(author)
     setHIndex!(author)
     hindex_plot = plot(author.scopus_hindex)
     #=
@@ -56,14 +42,11 @@ for author in authors
     =#
     savefig(hindex_plot, "output/$(author.scopus_lastname).png")
     open("output/$(author.scopus_lastname)", "w") do file
-        #print(file, author)
-        #print("\n")
-        #print(file, author.scopus_hindex)
-        #print("\n")
-        print(file, getCitationDates(author))
+        print(file, author)
     end
 end
 
 for author in authors
     print(author.scopus_hindex)
+    @debug dump(author)
 end

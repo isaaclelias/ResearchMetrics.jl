@@ -10,7 +10,7 @@ using Plots
 using TimeSeries
 
 ENV["JULIA_DEBUG"] = HIndex
-logger = SimpleLogger(stdout, Logging.Debug)
+logger = SimpleLogger(stdout, Logging.Error)
 global_logger(logger)
 
 @test begin

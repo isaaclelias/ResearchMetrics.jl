@@ -2,3 +2,5 @@
 .ipynb_checkpoints/
 resources/
 src/secrets.jl
+output/
+logs/
