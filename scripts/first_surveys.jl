@@ -8,7 +8,7 @@ ENV["JULIA_DEBUG"] = HIndex
 io_path = "logs/hindex_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
 touch(io_path)
 io = open(io_path, "w+")
-logger = TeeLogger(ConsoleLogger(stdout, Logging.Error),
+logger = TeeLogger(ConsoleLogger(stdout, Logging.Debug),
                    SimpleLogger(io, Logging.Debug))
 global_logger(logger)
 
