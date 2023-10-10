@@ -23,7 +23,6 @@ using JSON
 using TimeSeries
 using Dates
 using SHA
-using Dates
 
 include("author.jl")
 include("abstract.jl")

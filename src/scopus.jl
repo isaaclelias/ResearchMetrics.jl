@@ -57,7 +57,6 @@ function setBasicInfoFromScopus!(author::Author; only_local::Bool=false)::Nothin
 end
 
 function queryScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
-    if !in_a_hurry && !only_local; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
     response = ""
     local_query = localQuery(scopusAbstractRetrieval_fprefix, query_string)
     if !isnothing(local_query)
@@ -72,6 +71,7 @@ function queryScopusAbstractRetrieval(query_string::String; only_local::Bool=fal
                   "X-ELS-APIKey" => scopus_api_key
                   ]
         try
+            if !in_a_hurry; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
             response = HTTP.get(endpoint*query_string, headers).body |> String
         catch y
             if isa(y, HTTP.StatusError)
@@ -150,21 +150,23 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
         end
     end
     =#
+
+    #=
     if haskey(response_parse["coredata"], "dc:creator")
         @debug "dc:creator style"
-    elseif haskey(response_parse, "authors") || haskey(response_parse["author"], "author")
+    elseif haskey(response_parse, "authors") || haskey(response_parse["authors"], "author")
         @debug "[authors][author] style"
     else
         @debug "new style"
     end
+    =#
 
     @debug "Basic information set?" abstract.title abstract.date_pub abstract.scopus_authids
 
     return nothing
 end
 
-function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool, in_a_hurry::Bool=false)::Union{String, Nothing}
-    if !in_a_hurry && !only_local; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
+function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     formatted_query_string = query_string
     local_query = localQuery(scopusSearch_fprefix, formatted_query_string*"$start")
     if !isnothing(local_query)
@@ -184,7 +186,9 @@ function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool,
                   "start" => "$start"
                   ]
         try
+            if !in_a_hurry; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
             response = HTTP.get(endpoint, headers; query=params).body |> String
+            saveQuery(scopusSearch_fprefix, formatted_query_string*"$start", response)
             return response
         catch y
             if isa(y, HTTP.Exceptions.StatusError)
@@ -193,7 +197,6 @@ function queryScopusSearch(query_string::String, start::Int=0; only_local::Bool,
                 return nothing
             end
         end
-        saveQuery(scopusSearch_fprefix, formatted_query_string*"$start", response)
     end
 end
 

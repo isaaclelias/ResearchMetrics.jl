@@ -13,23 +13,23 @@ logger = TeeLogger(ConsoleLogger(stdout, Logging.Debug),
 global_logger(logger)
 
 authors = [ 
-    Author("hommelhoff", "universität erlangen-nürnberg") # Survey 2
-    #Author("martínez-pinedo", "technische universitat darmstadt") # Survey 3
-    #Author("andré", "universität augsburg") # Survey 4
-    #Author("haddadin", "technische universität münchen") # Survey 5
-    #Author("wessling", "rwth") # Survey 6
-    #Author("schölkopf", "mpi") # Survey 7
-    #Author("mädler", "universität bremen") # Survey 8
-    #Author("grimme", "universität bonn") # Survey 9
-    #Author("dreizler", "technische universität darmstadt") # Survey 9
-    #Author("merklein", "universität erlangen-nürnberg") # Survey 8
-    #Author("rosch", "universität zu köln") # Survey 7
+    #Author("hommelhoff", "universität erlangen-nürnberg") # Survey 2
+    Author("martínez-pinedo", "technische universitat darmstadt") # Survey 3
+    Author("andré", "universität augsburg") # Survey 4
+    Author("haddadin", "technische universität münchen") # Survey 5
+    Author("wessling", "rwth") # Survey 6
+    Author("schölkopf", "mpi") # Survey 7
+    Author("mädler", "universität bremen") # Survey 8
+    Author("grimme", "universität bonn") # Survey 9
+    Author("dreizler", "technische universität darmstadt") # Survey 9
+    Author("merklein", "universität erlangen-nürnberg") # Survey 8
+    Author("rosch", "universität zu köln") # Survey 7
 ] 
 
 for author in authors
-    setBasicInfo!(author, only_local=true)
-    setAuthoredAbstracts!(author, only_local=true)
-    setCitations!(author, only_local=true)
+    setBasicInfo!(author)
+    setAuthoredAbstracts!(author)
+    setCitations!(author)
     @debug "setCitationsBasicInfo starts here"
     setCitationsBasicInfo!(author)
     setHIndex!(author)

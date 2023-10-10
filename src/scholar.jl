@@ -46,6 +46,7 @@ function querySerapiGScholar(query_string::String; only_local::Bool=false)::Unio
         if only_local || queryKnownToFault(serapi_fprefix, query_string)
             return nothing
         else
+            sleep(3.6)
             return remoteQuerySerapiGScholar(query_string)
         end
     end
@@ -139,6 +140,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
                       "engine" => "google_scholar",
                       "cites" => query_string,
                       "start" => "$start"]
+            sleep(3.6)
             response = HTTP.get(endpoint; query=params).body |> String
             saveQuery(serpapiGScholarCite_fprefix, query_string*"$start", response)
         end
