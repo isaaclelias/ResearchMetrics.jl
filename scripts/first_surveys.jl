@@ -14,9 +14,9 @@ global_logger(logger)
 
 authors = [ 
     #Author("hommelhoff", "universität erlangen-nürnberg") # Survey 2
-    Author("martínez-pinedo", "technische universitat darmstadt") # Survey 3
-    Author("andré", "universität augsburg") # Survey 4
-    Author("haddadin", "technische universität münchen") # Survey 5
+    #Author("martínez-pinedo", "technische universitat darmstadt") # Survey 3
+    #Author("andré", "universität augsburg") # Survey 4
+    #Author("haddadin", "technische universität münchen") # Survey 5
     Author("wessling", "rwth") # Survey 6
     Author("schölkopf", "mpi") # Survey 7
     Author("mädler", "universität bremen") # Survey 8
