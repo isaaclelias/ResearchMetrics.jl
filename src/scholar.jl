@@ -122,6 +122,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     endpoint = "https://serpapi.com/search?engine=google_scholar"
     start = -1
     n_response = 1
+    n_response_total = 0
     citations = Vector{Abstract}()
     while true
         start = start+n_response
@@ -157,7 +158,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         response_parse = JSON.parse(response)
         if (!haskey(response_parse, "organic_results") ||
             !haskey(response_parse["organic_results"][1]["inline_links"], "cited_by"))
-            @warn "Received a response, but something wrong" abstract.title start queryID(query_string*"$start")
+            @warn "Received a response, but something wrong" abstract.title start n_response_total queryID(query_string*"$start")
             break
         end
 
@@ -171,7 +172,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         n_response = length(response_parse["organic_results"])
         n_response_total = response_parse["search_information"]["total_results"]
         ## If last page
-        if start >= n_response_total || n_response == 0 || n_response_total <= 10 || start > 240
+        if start >= n_response_total-10 || n_response == 0 || n_response_total <= 10 || start > 240
             break
         end
     end
