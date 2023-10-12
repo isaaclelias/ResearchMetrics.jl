@@ -14,10 +14,10 @@ function setScopusAbstractRetrieval!(author::Author; only_local::Bool=false)::No
     response_parse = JSON.parse(response)
 
     # Setting the Author values
-    author.scopus_firstname         = response_parse["search-results"]["entry"][1]["preferred-name"]["given-name"]
-    author.scopus_lastname          = response_parse["search-results"]["entry"][1]["preferred-name"]["surname"]
+    author.firstname         = response_parse["search-results"]["entry"][1]["preferred-name"]["given-name"]
+    author.lastname          = response_parse["search-results"]["entry"][1]["preferred-name"]["surname"]
     author.scopus_affiliation_id    = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-id"]
-    author.scopus_affiliation_name  = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
+    author.affiliation  = response_parse["search-results"]["entry"][1]["affiliation-current"]["affiliation-name"]
     #author.orcid_id                 = response_parse["search-results"]["entry"][1]["orcid"]
     author.scopus_query_nresults    = response_parse["search-results"]["opensearch:totalResults"]
     author.scopus_query_string      = query_string

@@ -1,4 +1,4 @@
-function requestScopusSearch(query_string::String, start::Int=0; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
+function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     formatted_query_string = query_string
     local_query = localQuery(scopusSearch_fprefix, formatted_query_string*"$start")
     if !isnothing(local_query)
@@ -31,7 +31,7 @@ function requestScopusSearch(query_string::String, start::Int=0; only_local::Boo
         end
     end
 end
-@deprecate queryScopusSearch(query_string::String, start) _requestScopusSearch
+@deprecate queryScopusSearch(query_string::String, start::Int=0; only_local::Bool=false, in_a_hurry::Bool=false) _requestScopusSearch(query_string, start=0, only_local=only_local, in_a_hurry=in_a_hurry)
 
 """
 - write!
@@ -84,4 +84,4 @@ function setScopusArticles!(author::Author; only_local::Bool=false)::Nothing
     author.abstracts = getScopusAuthoredAbstracts(author, only_local=only_local)
     return nothing
 end
-@deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles(author, only_local=only_local)
+@deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)

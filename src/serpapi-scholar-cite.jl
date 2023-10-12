@@ -1,3 +1,5 @@
+export setSerpapiGScholarCite!
+
 """
     querySerpapiGScholarCite(::Abstract)
 
@@ -103,8 +105,18 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     return citations
 end
 
-function setSerpapiGScholarCite!(abstract::Abstract; only_local::Bool=false)::Nothing    
+function setSerpapiGScholarCite!(abstract::Article; only_local::Bool=false)::Nothing    
     abstract.scopus_citations = querySerapiGScholarCite(abstract, only_local=only_local)
     return nothing
 end
 @deprecate setCitations!(abstract::Abstract; only_local::Bool=false) setSerpapiGScholarCite!(abstract, only_local=only_local)
+
+function setSerpapiGScholarCite!(author::Researcher; only_local::Bool=false)::Nothing
+    @debug length(author.abstracts)
+    for i in 1:length(author.abstracts)
+        setCitations!(author.abstracts[i], only_local=only_local)
+    end
+    return nothing
+end
+@deprecate setCitations!(author::Author; only_local::Bool=false) setSerpapiGScholarCite!(author, only_local=only_local)
+

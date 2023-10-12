@@ -1,10 +1,9 @@
-include("../src/hindex.jl")
-using .HIndex
+include("../src/main.jl")
+using .ResearchMetrics
 using Dates
 using Logging, LoggingExtras
 using Plots
 
-ENV["JULIA_DEBUG"] = HIndex
 io_path = "logs/hindex_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
 touch(io_path)
 io = open(io_path, "w+")

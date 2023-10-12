@@ -1,3 +1,9 @@
+function _uniqueidentifierSHA(unique_identifier::String)::String
+    query_sha = first(bytes2hex(sha256(unique_identifier)), sha_length)
+end
+@deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
+
+
 """
     localQuery(::String)::String
 """
@@ -46,6 +52,4 @@ function addQueryKnownToFault(query_type::String, query_string::String)::Nothing
     return nothing
 end
 
-function formatAuthorSearchReport()
-    
-end
+

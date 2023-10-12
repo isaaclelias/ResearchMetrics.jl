@@ -1,6 +1,6 @@
 using Dates
 
-struct Prize <: type
+struct Prize
     name::String
     date::Date
 end

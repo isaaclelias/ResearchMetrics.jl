@@ -1,9 +1,3 @@
-using HTTP
-using JSON
-using TimeSeries
-using Dates
-using SHA
-
 """
 Provides functions to bulk query scientific database for authors and analyse their h-indexes.
 
@@ -16,9 +10,18 @@ Tasks:
 """
 module ResearchMetrics
 
+using HTTP
+using JSON
+using TimeSeries
+using Dates
+using SHA
+
+
 include("secrets.jl")
 include("abstract.jl")
+include("prize.jl")
 include("author.jl")
+include("local.jl")
 include("scopus.jl")
 include("scholar.jl")
 include("hindex.jl")

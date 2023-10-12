@@ -1,4 +1,4 @@
-export Author
+export Researcher
 export setAuthoredAbstracts!, setCitations!, getCitationDates
 
 """
@@ -44,18 +44,10 @@ mutable struct Researcher
         return author
     end
 end
-@deprecate_binding Author Researcher
+Base.@deprecate_binding Author Researcher
 
 function setBasicInfo!(author::Author; only_local::Bool=false)::Nothing
     setBasicInfoFromScopus!(author, only_local=only_local)
-end
-
-function setCitations!(author::Author; only_local::Bool=false)::Nothing
-    @debug length(author.abstracts)
-    for i in 1:length(author.abstracts)
-        setCitations!(author.abstracts[i], only_local=only_local)
-    end
-    return nothing
 end
 
 function setCitationsBasicInfo!(author::Author; only_local::Bool=false)::Nothing
@@ -94,44 +86,17 @@ function prizes(author::Author)
 end
 
 function hindex(author::Author)
-    return author.scopus_hindex
+  if !isnothing(author.hindex)
+      return author.scopus_hindex
+  else
+      _sethindex!(author)
+      return author.scopus_hindex
+  end
 end
 
 function hindexat(author::Author, date::Author)::Int
     error("Not implemented") 
 end
-
-"""
-Tasks:
-- Better names for the variables please
-"""
-function _sethindex!(author::Author)::Nothing
-    abstracts = author.abstracts
-    all_citation_dates = getCitationDates(author) # Getting a list of all publication dates
-    hindex_current = 0
-    hindex_values = Vector{Int}()
-    hindex_dates = Vector{Date}()
-    for date in all_citation_dates
-        citation_count_per_abstract = Vector{Int}()
-        for abstract in abstracts
-            if !isnothing(abstract.scopus_citation_count) && length(values(to(abstract.scopus_citation_count, date))) > 0
-                push!(citation_count_per_abstract, values(to(abstract.scopus_citation_count, date))[end])
-            end
-        end
-        hindex_at_date = calcHIndex(citation_count_per_abstract)
-        if hindex_at_date > hindex_current
-            hindex_current = hindex_at_date
-            push!(hindex_values, hindex_at_date)
-            push!(hindex_dates, date)
-        end
-    end
-
-    hindex = TimeArray(hindex_dates, hindex_values)
-    author.scopus_hindex = hindex
-    
-    return nothing
-end
-@deprecate setScopusHIndex!(author::Author) _sethindex!(author)
 
 
 #=

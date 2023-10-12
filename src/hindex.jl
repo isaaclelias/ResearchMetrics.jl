@@ -1,15 +1,7 @@
-export Author, Abstract
-export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, setHIndex!, queryID
+export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
 
 sha_length = 20
 api_query_folder = "resources/extern/"
-
-function _uniqueidentifierSHA(unique_identifier::String)::String
-    query_sha = first(bytes2hex(sha256(unique_identifier)), sha_length)
-end
-@deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
-
-include("local.jl")
 
 """
     saveQuery(query_type::String, query_string::String)::Nothing
@@ -37,7 +29,7 @@ Pops all papers authored by `author` from the `abstracts`.
 Tasks:
 - TEST IT
 """
-function popSelfCitations!(abstracts::Vector{Abstract}, author::Author)
+function popSelfCitations!(abstracts::Vector{Article}, author::Researcher)
     for abstract in abstracts
         if author.scopus_authid in abstract.scopus_authids
             pop!(abstracts, abstract)
@@ -71,13 +63,45 @@ function calcHIndex(citation_count::Vector{Int})::Int
     return h_index
 end
 
+#=
 function _sethindex!(author::Author)::Nothing
     setScopusHIndex!(author)
     return nothing
 end
-@deprecate setHIndex!(author::Author) _sethindex(author)
+=#
 
-end #module
+"""
+Tasks:
+- Better names for the variables please
+"""
+function _sethindex!(author::Author)::Nothing
+    abstracts = author.abstracts
+    all_citation_dates = getCitationDates(author) # Getting a list of all publication dates
+    hindex_current = 0
+    hindex_values = Vector{Int}()
+    hindex_dates = Vector{Date}()
+    for date in all_citation_dates
+        citation_count_per_abstract = Vector{Int}()
+        for abstract in abstracts
+            if !isnothing(abstract.scopus_citation_count) && length(values(to(abstract.scopus_citation_count, date))) > 0
+                push!(citation_count_per_abstract, values(to(abstract.scopus_citation_count, date))[end])
+            end
+        end
+        hindex_at_date = calcHIndex(citation_count_per_abstract)
+        if hindex_at_date > hindex_current
+            hindex_current = hindex_at_date
+            push!(hindex_values, hindex_at_date)
+            push!(hindex_dates, date)
+        end
+    end
+
+    hindex = TimeArray(hindex_dates, hindex_values)
+    author.scopus_hindex = hindex
+    
+    return nothing
+end
+@deprecate setHIndex!(author::Author) _sethindex(author)
+@deprecate setScopusHIndex!(author::Author) _sethindex!(author)
 
 #=
 function setInfoForHIndexEvaluation(author::Author; only_local::Bool=false)::Nothing

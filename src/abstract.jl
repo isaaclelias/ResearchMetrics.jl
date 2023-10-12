@@ -20,20 +20,20 @@ mutable struct Article
     scholar_citesid::Union{String, Nothing, Missing}
 
     # Should be refactored to be not scopus only
-    scopus_citations::Union{Vector{Abstract}, Nothing} # Refactor to `citing_articles`
+    scopus_citations::Union{Vector{Article}, Nothing} # Refactor to `citing_articles`
 
     # Where is it listed?
     found_in_scopus::Union{Bool, Nothing}
     found_in_scholar::Union{Bool, Nothing}
     
     # Enforces that every abstract has a title
-    function Abstract(title::String)
+    function Article(title::String)
         abstract = new(ntuple(x->nothing, fieldcount(Abstract))...)
         abstract.title = title
         return abstract
     end
 end
-@deprecate_binding Abstract Article
+Base.@deprecate_binding Abstract Article
 
 function setBasicInfo!(abstract::Abstract; only_local::Bool=false)::Nothing
     setBasicInfoFromScopus!(abstract, only_local=only_local)
