@@ -28,7 +28,7 @@ end
 """
     setScopusSearchData!(::Author)::Nothing
 """
-function setBasicInfoFromScopus!(author::Author; only_local::Bool=false)::Nothing
+function setScopusAbstractRetrieval!(author::Author; only_local::Bool=false)::Nothing
     @info "Setting basic information for" author.query_name author.query_affiliation
     query_string = "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"
     local_query = localQuery(scopusAuthorSearch_fprefix, query_string)
@@ -55,6 +55,8 @@ function setBasicInfoFromScopus!(author::Author; only_local::Bool=false)::Nothin
 
     return nothing
 end
+@deprecate setBasicInfoFromScopus!(author::Author; only_local::Bool=false) setScopusAbstractRetrieval!(author, only_local=only_local)
+
 
 function queryScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     response = ""

@@ -6,22 +6,21 @@ export setBasicInfo!, setCitations!, setCitationsBasicInfo!
 """
 Store information about abstracts.
 """
-mutable struct Abstract
+mutable struct Abstract # Refactor to `Article`
     title::Union{String, Nothing}
     date_pub::Union{Date, Nothing}
     doi::Union{String, Nothing}
 
     # Scopus
     scopus_scopusid::Union{Int, Nothing}
-    scopus_eid::Union{String, Nothing}
     scopus_authids::Union{Vector{Int}, Nothing}
-    scopus_citation_count::Union{TimeArray, Nothing}
+    scopus_citation_count::Union{TimeArray, Nothing} # Refactor to citation count
 
     # Scholar
     scholar_citesid::Union{String, Nothing, Missing}
 
     # Should be refactored to be not scopus only
-    scopus_citations::Union{Vector{Abstract}, Nothing}
+    scopus_citations::Union{Vector{Abstract}, Nothing} # Refactor to `citing_articles`
 
     # Where is it listed?
     found_in_scopus::Union{Bool, Nothing}
@@ -62,7 +61,7 @@ end
 NOT TESTED
 Returns all the dates that the given abstract was cited.
 """
-function getCitationDates(abstract::Abstract)::Union{Vector{Date}, Nothing}
+function citationdates(abstract::Abstract)::Union{Vector{Date}, Nothing}
     # Do we have the data?
     if isnothing(abstract.scopus_citations)
         @error "No citations set" abstract.title
@@ -79,8 +78,9 @@ function getCitationDates(abstract::Abstract)::Union{Vector{Date}, Nothing}
     sort!(citation_dates)
     return citation_dates
 end
+@deprecate getCitationDates(article) citationdates(article)
 
-function setCitationCount!(abstract::Abstract)
+function _setcitationcount!(abstract::Abstract)
     citation_dates = getCitationDates(abstract)
     if !isnothing(citation_dates)
         onetolength = [i for i=1:length(citation_dates)]
@@ -88,4 +88,17 @@ function setCitationCount!(abstract::Abstract)
     else
         @error "Couldn't set citation dates for" abstract.title
     end
+end
+@deprecate setCitationsCount!(article::Abstract) _setcitationcount(abstract)
+
+function citations(article::Abstract; skip_self::Bool=false)
+    if skip_self
+        error("Not implemented")
+    else
+        return article.scopus_citations
+    end
+end
+
+function citationcountat(article::Abstract, date::Date)::Int
+    article.scopus_citation_count
 end
