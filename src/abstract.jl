@@ -6,7 +6,7 @@ export setBasicInfo!, setCitations!, setCitationsBasicInfo!
 """
 Store information about abstracts.
 """
-mutable struct Abstract # Refactor to `Article`
+mutable struct Article
     title::Union{String, Nothing}
     date_pub::Union{Date, Nothing}
     doi::Union{String, Nothing}
@@ -33,14 +33,10 @@ mutable struct Abstract # Refactor to `Article`
         return abstract
     end
 end
+@deprecate_binding Abstract Article
 
 function setBasicInfo!(abstract::Abstract; only_local::Bool=false)::Nothing
     setBasicInfoFromScopus!(abstract, only_local=only_local)
-    return nothing
-end
-
-function setCitations!(abstract::Abstract; only_local::Bool=false)::Nothing    
-    abstract.scopus_citations = querySerapiGScholarCite(abstract, only_local=only_local)
     return nothing
 end
 
@@ -79,6 +75,20 @@ function citationdates(abstract::Abstract)::Union{Vector{Date}, Nothing}
     return citation_dates
 end
 @deprecate getCitationDates(article) citationdates(article)
+
+function setScopusCitationCount(abstract::Abstract)::Nothing
+    if isnothing(abstract.scopus_citations)
+        @error "No citations set for the given abstract"
+    end
+    
+    citation_dates = Vector{Date}
+    for citation in abstract.citations
+        push!(citation_dates, citation.date)
+    end
+
+    abstract.scopus_citation_count = TimeArray(citation_dates, 1:length(abstract.citations))
+end
+
 
 function _setcitationcount!(abstract::Abstract)
     citation_dates = getCitationDates(abstract)
