@@ -1,4 +1,5 @@
 export Researcher
+export hindex, articles, prizes, citationcountat, citations, citationdates, hindexat
 export setAuthoredAbstracts!, setCitations!, getCitationDates
 
 """
@@ -23,6 +24,7 @@ mutable struct Researcher
 
     abstracts::Union{Vector{Article}, Nothing}
     prizes::Union{Vector{Prize}, Nothing}
+    hindex::Union{TimeArray, Nothing}
 
     # Scopus
     ## Basic info
@@ -30,7 +32,6 @@ mutable struct Researcher
     scopus_affiliation_id::Union{String, Nothing}
     scopus_query_nresults::Union{String, Nothing}
     scopus_query_string::Union{String, Nothing}
-    scopus_hindex::Union{TimeArray, Nothing} # Refactor to `hindex` only
     ## Authored
 
     # ORCID

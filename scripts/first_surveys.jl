@@ -1,4 +1,4 @@
-include("../src/main.jl")
+include("../src/ResearchMetrics.jl")
 using .ResearchMetrics
 using Dates
 using Logging, LoggingExtras
@@ -31,8 +31,7 @@ for author in authors
     setCitations!(author)
     @debug "setCitationsBasicInfo starts here"
     setCitationsBasicInfo!(author)
-    setHIndex!(author)
-    hindex_plot = plot(author.scopus_hindex)
+    hindex_plot = plot(hindex(author))
     #=
     for author in authors
         for abstract in filter(x->!isnothing(x.scopus_citation_count), author.abstracts)

@@ -74,7 +74,7 @@ function citationdates(abstract::Abstract)::Union{Vector{Date}, Nothing}
     sort!(citation_dates)
     return citation_dates
 end
-@deprecate getCitationDates(article) citationdates(article)
+@deprecate getCitationDates(article::Article) citationdates(article)
 
 function setScopusCitationCount(abstract::Abstract)::Nothing
     if isnothing(abstract.scopus_citations)
@@ -99,7 +99,7 @@ function _setcitationcount!(abstract::Abstract)
         @error "Couldn't set citation dates for" abstract.title
     end
 end
-@deprecate setCitationsCount!(article::Abstract) _setcitationcount(abstract)
+@deprecate setCitationCount!(article::Abstract) _setcitationcount!(abstract)
 
 function citations(article::Abstract; skip_self::Bool=false)
     if skip_self
