@@ -1,8 +1,9 @@
+#=
 """
     setScopusSearchData!(::Author)::Nothing
 """
 function setScopusAbstractRetrieval!(author::Author; only_local::Bool=false)::Nothing
-    @info "Setting basic information for" author.query_name author.query_affiliation
+    @debug "Setting basic information for" author.query_name author.query_affiliation
     query_string = "AUTHLASTNAME($(author.query_name)) and AFFIL($(author.query_affiliation))"
     local_query = localQuery(scopusAuthorSearch_fprefix, query_string)
     response = ""
@@ -26,19 +27,21 @@ function setScopusAbstractRetrieval!(author::Author; only_local::Bool=false)::No
     scopus_authid                   = replace(scopus_authid, r"https://api.elsevier.com/content/author/author_id/"=>"")
     author.scopus_authid            = parse(Int, scopus_authid)
 
+    @debug "setScopusAbstractRetrieval" author.firstname author.lastname author.scopus_affiliation_id author.
+
     return nothing
 end
 @deprecate setBasicInfoFromScopus!(author::Author; only_local::Bool=false) setScopusAbstractRetrieval!(author, only_local=only_local)
+=#
 
 function requestScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     response = ""
     local_query = localQuery(scopusAbstractRetrieval_fprefix, query_string)
     if !isnothing(local_query)
-        @info "Scopus Abstract Retrieval found locally" query_string
         return local_query
     elseif !only_local && !queryKnownToFault(scopusAbstractRetrieval_fprefix, query_string)
         # Preparing API
-        @info "Requesting Scopus Abstract Retrieval API" query_string
+        @debug "Requesting Scopus Abstract Retrieval API" query_string
         endpoint = "https://api.elsevier.com/content/abstract/scopus_id/"
         headers = [
                    "Accept" => "application/json",
@@ -49,7 +52,7 @@ function requestScopusAbstractRetrieval(query_string::String; only_local::Bool=f
             response = HTTP.get(endpoint*query_string, headers).body |> String
         catch y
             if isa(y, HTTP.StatusError)
-                @error "HTTP StatusError on Scopus Abstract Retrieval" 
+                @debug "HTTP StatusError on Scopus Abstract Retrieval" 
                 addQueryKnownToFault(scopusAbstractRetrieval_fprefix, query_string)
                 return nothing
             end
@@ -92,7 +95,7 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
             abstract.scopus_scopusid = parse(Int, scopusid)
             @debug "Scopus ID set succesfully?" abstract.title abstract.scopus_scopusid
         else
-            @error "Couldn't find information on Scopus Search for" abstract.title
+            @debug "Couldn't find information on Scopus Search for" abstract.title
             return nothing
         end
     end
@@ -100,7 +103,7 @@ function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
     query_string = string(abstract.scopus_scopusid)
     response = queryScopusAbstractRetrieval(query_string, only_local=only_local)
     if isnothing(response)
-        @error "Couldn't set information on Scopus Abstract Retrieval, no response from Scopus Abstract Retrieval" abstract.title abstract.scopus_scopusid queryID(query_string)
+        @debug "Couldn't set information on Scopus Abstract Retrieval, no response from Scopus Abstract Retrieval" abstract.title abstract.scopus_scopusid queryID(query_string)
         return nothing
     end
     response_parse = JSON.parse(response)

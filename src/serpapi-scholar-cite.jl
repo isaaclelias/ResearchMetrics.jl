@@ -14,7 +14,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     end
     # Missing
     if ismissing(abstract.scholar_citesid)
-        @error "Couldn't query GScholarCite because citesid is missing" abstract.title 
+        @debug "Couldn't query GScholarCite because citesid is missing" abstract.title 
         return nothing
     end
 #=
@@ -50,7 +50,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     n_response = 1
     n_response_total = 0
     citations = Vector{Abstract}()
-    while true
+    while true # refactor for a proper for loop intead of this atrocity
         start = start+n_response
         if start >= 240
             break
@@ -103,6 +103,10 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         end
     end
     return citations
+
+    #=
+
+    =#
 end
 
 function setSerpapiGScholarCite!(abstract::Publication; only_local::Bool=false)::Nothing    
@@ -111,12 +115,12 @@ function setSerpapiGScholarCite!(abstract::Publication; only_local::Bool=false):
 end
 @deprecate setCitations!(abstract::Abstract; only_local::Bool=false) setSerpapiGScholarCite!(abstract, only_local=only_local)
 
-function setSerpapiGScholarCite!(author::Researcher; only_local::Bool=false)::Nothing
+function setCitationsWithSerpapiGScholarCite!(author::Researcher; only_local::Bool=false)::Nothing
     @debug length(author.abstracts)
     for i in 1:length(author.abstracts)
         setCitations!(author.abstracts[i], only_local=only_local)
     end
     return nothing
 end
-@deprecate setCitations!(author::Author; only_local::Bool=false) setSerpapiGScholarCite!(author, only_local=only_local)
+@deprecate setCitations!(author::Author; only_local::Bool=false) setCitationsWithSerpapiGScholarCite!(author, only_local=only_local)
 

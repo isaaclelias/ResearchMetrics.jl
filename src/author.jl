@@ -27,6 +27,9 @@ mutable struct Researcher
     ## Basic info
     scopus_authid::Union{Int, Nothing}
     scopus_affiliation_id::Union{String, Nothing}
+    scopus_firstname::Union{String, Nothing}
+    scopus_lastname::Union{String, Nothing}
+    scopus_affiliation::Union{String, Nothing}
     scopus_query_nresults::Union{String, Nothing}
     scopus_query_string::Union{String, Nothing}
     ## Authored

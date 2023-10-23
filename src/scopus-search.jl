@@ -1,3 +1,5 @@
+export setAuthoredPublicationsOnScopus!
+
 function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     formatted_query_string = query_string
     local_query = localQuery(scopusSearch_fprefix, formatted_query_string*"$start")
@@ -43,7 +45,9 @@ Tasks:
 - Iterate over the list of received objects and populate the Vector{Abstract}
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
-function getScopusAuthoredAbstracts(author::Author; only_local::Bool=false)::Vector{Abstract}
+function getScopusAuthoredAbstracts(author::Author; 
+                                    only_local::Bool=false,
+                                    progress_bar::Bool=false)::Vector{Abstract}
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()
@@ -56,7 +60,10 @@ function getScopusAuthoredAbstracts(author::Author; only_local::Bool=false)::Vec
             @error "No entries found on Scopus Search answer" query_string*" start=$start"
             break
         end
-        for (i, result) in enumerate(response_parse["search-results"]["entry"])
+
+        iter = enumerate(enumerate(response_parse["search-results"]["entry"]))
+        if progress_bar; iter = ProgressBar(iter); end
+        for (i, result) in iter
             abstract = Abstract(result["dc:title"])
             # Setting the fields
             ## Triming the abstract url to get the id
@@ -75,13 +82,13 @@ function getScopusAuthoredAbstracts(author::Author; only_local::Bool=false)::Vec
         if start >= n_result_total
             break
         end
-        @info "Querying for another Scopus Search results page"
+        @debug "Querying for another Scopus Search results page"
     end
     return authored_abstracts
 end
 
-function setScopusArticles!(author::Author; only_local::Bool=false)::Nothing
-    author.abstracts = getScopusAuthoredAbstracts(author, only_local=only_local)
+function setAuthoredPublicationsWithScopusSearch!(author::Author; only_local::Bool=false; progress_bar=false)::Nothing
+    author.abstracts = getScopusAuthoredAbstracts(author, only_local=only_local, progress_bar=progress_bar)
     return nothing
 end
 @deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)

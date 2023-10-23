@@ -15,6 +15,7 @@ using JSON
 using TimeSeries
 using Dates
 using SHA
+using ProgressBars
 
 
 include("secrets.jl")

@@ -23,6 +23,10 @@ function localQuery(query_type::String, query_string::String)::Union{String, Not
     end 
 end
 
+function queryLocal(query_type::String, query_min_date::Date, query_id::"String")
+  
+end
+
 """
     queryKnownToFault(query_type::String, query_string::String)
 
