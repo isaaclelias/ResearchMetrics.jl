@@ -13,16 +13,13 @@ Tasks:
 - Refactor `scopus_FIELD` to `FIELD`
 """
 mutable struct Researcher
-    # Query data
-    query_name::Union{String, Nothing}
-    query_affiliation::Union{String, Nothing}
 
     # Basic info
     firstname::Union{String, Nothing}
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
 
-    abstracts::Union{Vector{Article}, Nothing}
+    abstracts::Union{Vector{Publication}, Nothing}
     prizes::Union{Vector{Prize}, Nothing}
     hindex::Union{TimeArray, Nothing}
 
@@ -38,10 +35,10 @@ mutable struct Researcher
     orcid_id::Union{String, Nothing}
 
     # Enforce that `Author` has at least these two fields filled up
-    function Researcher(query_name::String, query_affiliation::String)
+    function Researcher(lastname::String, affiliation::String)
         author = new(ntuple(x->nothing, fieldcount(Author))...)
-        author.query_name = query_name
-        author.query_affiliation = query_affiliation
+        author.lastname = lastname
+        author.affiliation = affiliation
         return author
     end
 end

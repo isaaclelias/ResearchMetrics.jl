@@ -4,3 +4,4 @@ resources/
 src/secrets.jl
 output/
 logs/
+hindex_analysis.ipynb

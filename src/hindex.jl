@@ -29,7 +29,7 @@ Pops all papers authored by `author` from the `abstracts`.
 Tasks:
 - TEST IT
 """
-function popSelfCitations!(abstracts::Vector{Article}, author::Researcher)
+function popSelfCitations!(abstracts::Vector{Publication}, author::Researcher)
     for abstract in abstracts
         if author.scopus_authid in abstract.scopus_authids
             pop!(abstracts, abstract)

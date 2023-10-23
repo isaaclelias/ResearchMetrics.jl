@@ -1,12 +1,13 @@
 using Dates
 using TimeSeries
 
+export Publication
 export setBasicInfo!, setCitations!, setCitationsBasicInfo!
 
 """
 Store information about abstracts.
 """
-mutable struct Article
+mutable struct Publication
     title::Union{String, Nothing}
     date_pub::Union{Date, Nothing}
     doi::Union{String, Nothing}
@@ -20,20 +21,42 @@ mutable struct Article
     scholar_citesid::Union{String, Nothing, Missing}
 
     # Should be refactored to be not scopus only
-    scopus_citations::Union{Vector{Article}, Nothing} # Refactor to `citing_articles`
+    scopus_citations::Union{Vector{Publication}, Nothing} # Refactor to `citing_articles`
 
     # Where is it listed?
     found_in_scopus::Union{Bool, Nothing}
     found_in_scholar::Union{Bool, Nothing}
     
     # Enforces that every abstract has a title
-    function Article(title::String)
+    function Publication(title::String)
         abstract = new(ntuple(x->nothing, fieldcount(Abstract))...)
         abstract.title = title
         return abstract
     end
+
+    function Publication(title::String, date::Date)
+        abstract = new(ntuple(x->nothing, fieldcount(Abstract))...)
+        abstract.title = title
+        abstract.date_pub = date
+        return abstract
+    end
+    
+    function Publication(title::String, date::Date; citations::Vector{Publication})
+        abstract = new(ntuple(x->nothing, fieldcount(Abstract))...)
+        abstract.title = title
+        abstract.date_pub = date
+        abstract.scopus_citations = citations
+        return abstract
+    end
+
+    function Publication(date::Date)
+        abstract = new(ntuple(x->nothing, fieldcount(Abstract))...)
+        abstract.date_pub = date
+        return abstract
+
+    end
 end
-Base.@deprecate_binding Abstract Article
+Base.@deprecate_binding Abstract Publication
 
 function setBasicInfo!(abstract::Abstract; only_local::Bool=false)::Nothing
     setBasicInfoFromScopus!(abstract, only_local=only_local)
@@ -74,7 +97,7 @@ function citationdates(abstract::Abstract)::Union{Vector{Date}, Nothing}
     sort!(citation_dates)
     return citation_dates
 end
-@deprecate getCitationDates(article::Article) citationdates(article)
+  @deprecate getCitationDates(article::Publication) citationdates(article)
 
 function setScopusCitationCount(abstract::Abstract)::Nothing
     if isnothing(abstract.scopus_citations)

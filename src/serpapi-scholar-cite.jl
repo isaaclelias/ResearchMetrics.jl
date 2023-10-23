@@ -105,7 +105,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     return citations
 end
 
-function setSerpapiGScholarCite!(abstract::Article; only_local::Bool=false)::Nothing    
+function setSerpapiGScholarCite!(abstract::Publication; only_local::Bool=false)::Nothing    
     abstract.scopus_citations = querySerapiGScholarCite(abstract, only_local=only_local)
     return nothing
 end
