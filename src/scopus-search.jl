@@ -35,8 +35,6 @@ function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bo
 end
 @deprecate queryScopusSearch(query_string::String, start::Int=0; only_local::Bool=false, in_a_hurry::Bool=false) _requestScopusSearch(query_string, start=0, only_local=only_local, in_a_hurry=in_a_hurry)
 
-
-
 """
 - write!
 
@@ -56,14 +54,18 @@ function ScopusSearch(author::Author;
     authored_abstracts = Vector{Abstract}()
     while true
         response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=false)
-        response_parse = JSON.parse(response)
+        try
+            response_parse = JSON.parse(response)
+            response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=false)
+
+        catch y
+
+        end
         # Setting the values
-        # debugging
         if !haskey(response_parse["search-results"], "entry")
             @debug "No entries found on Scopus Search answer" query_string*" start=$start"
             break
         end
-
         iter = enumerate(response_parse["search-results"]["entry"])
         for (i, result) in iter
             abstract = Publication(result["dc:title"])
@@ -81,20 +83,7 @@ function ScopusSearch(author::Author;
         n_result = length(response_parse["search-results"]["entry"])
         start = start+n_result
         n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
-        
-        #=
-        # ProgressBar
-        lock = 1
-        if progress_bar
-            if lock == 0
-                prog = ProgressBar(total=n_result_total)
-                lock = 1
-            end
-            ProgressBars.update(prog, start)
-        end
-        =#
-
-        if start >= n_result_total
+               if start >= n_result_total
             break
         end
         @debug "Querying for another Scopus Search results page"
@@ -148,7 +137,6 @@ struct ScopusSearch <: AbstractVector{Abstract}
     results::Vector{Abstract}
     start::Int
 end
-
 
 function getindex(x::ScopusSearch, i)
     x.results[i]

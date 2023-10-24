@@ -3,11 +3,6 @@ function _uniqueidentifierSHA(unique_identifier::String)::String
 end
 @deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
 
-"""
-    saveQuery(query_type::String, query_string::String)::Nothing
-
-Saves the result to disk.
-"""
 function saveQuery(query_type::String, query_string::String, response::String)::Nothing
     fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*queryID(query_string)*".json"
     fpath = api_query_folder*fname
@@ -16,15 +11,9 @@ function saveQuery(query_type::String, query_string::String, response::String)::
         write(file, response)
         @debug "Query saved to disk" fpath
     end
-
     return nothing
 end
 
-
-
-"""
-    localQuery(::String)::String
-"""
 function localQuery(query_type::String, query_string::String)::Union{String, Nothing}
     regex = Regex(query_type*".*"*queryID(query_string))
     what_we_have = readdir(api_query_folder)
@@ -45,12 +34,6 @@ function queryLocal(query_type::String, query_min_date::Date, query_id::String)
   
 end
 
-"""
-    queryKnownToFault(query_type::String, query_string::String)
-
-TASKS:
-- Regexing an entire file seems a very inneficient way of doing it
-"""
 function queryKnownToFault(query_type::String, query_string::String)::Bool
     fpath = "resources/known-to-fault"
     touch(fpath)
