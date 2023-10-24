@@ -1,4 +1,4 @@
-export setCitationsWithSerpapiGScholarCite!
+export setSerpapiGScholarCite!
 
 """
     querySerpapiGScholarCite(::Abstract)
@@ -115,10 +115,10 @@ function setSerpapiGScholarCite!(abstract::Publication; only_local::Bool=false):
 end
 @deprecate setCitations!(abstract::Abstract; only_local::Bool=false) setSerpapiGScholarCite!(abstract, only_local=only_local)
 
-function setCitationsWithSerpapiGScholarCite!(author::Researcher; only_local::Bool=false)::Nothing
+function setSerpapiGScholarCite!(author::Researcher; only_local::Bool=false, progress_bar=false)::Nothing
     @debug length(author.abstracts)
     for i in 1:length(author.abstracts)
-        setCitations!(author.abstracts[i], only_local=only_local)
+        setSerpapiGScholarCite!(author.abstracts[i], only_local=only_local)
     end
     return nothing
 end

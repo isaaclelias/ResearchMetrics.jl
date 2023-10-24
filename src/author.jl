@@ -99,6 +99,10 @@ function hindexat(author::Author, date::Author)::Int
     error("Not implemented") 
 end
 
+function mapcitations(func, destination::Researcher)
+    map(func, destination.citations)
+end
+
 
 #=
 """

@@ -1,4 +1,4 @@
-export setAuthoredPublicationsWithScopusSearch!
+export setScopusSearch!
 
 function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     formatted_query_string = query_string
@@ -62,7 +62,6 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
         end
 
         iter = enumerate(response_parse["search-results"]["entry"])
-        if progress_bar; iter = ProgressBar(iter); end
         for (i, result) in iter
             abstract = Publication(result["dc:title"])
             # Setting the fields
@@ -80,6 +79,7 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
         start = start+n_result
         n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
         
+        #=
         # ProgressBar
         lock = 1
         if progress_bar
@@ -89,6 +89,7 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
             end
             ProgressBars.update(prog, start)
         end
+        =#
 
         if start >= n_result_total
             break
@@ -98,7 +99,7 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
     return authored_abstracts
 end
 
-function setAuthoredPublicationsWithScopusSearch!(author::Author; only_local::Bool=false, progress_bar=false)::Nothing
+function setScopusSearch!(author::Author; only_local::Bool=false, progress_bar=false)::Nothing
     author.abstracts = getAuthoredPublicationsWithScopusSearch(author, only_local=only_local, progress_bar=progress_bar)
     return nothing
 end
