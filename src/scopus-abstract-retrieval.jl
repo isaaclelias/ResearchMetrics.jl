@@ -72,7 +72,7 @@ end
 
 Uses the Scopus Abstract Retrieval API to get data. If a Copus ID is `nothing`, tries to set it based on the article's title.
 """
-function setBasicInfoFromScopus!(abstract::Abstract; only_local::Bool)::Nothing
+function setScopusSearch!(abstract::Abstract; only_local::Bool)::Nothing
     @debug "Setting basic information from Scopus for" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:

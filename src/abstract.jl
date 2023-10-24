@@ -59,7 +59,7 @@ end
 Base.@deprecate_binding Abstract Publication
 
 function setBasicInfo!(abstract::Abstract; only_local::Bool=false)::Nothing
-    setBasicInfoFromScopus!(abstract, only_local=only_local)
+    setScopusSearch!(abstract, only_local=only_local)
     return nothing
 end
 

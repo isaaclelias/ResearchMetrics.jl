@@ -1,4 +1,4 @@
-export setSerpapiGScholarCite!
+export setCitationsWithSerpapiGScholarCite!
 
 """
     querySerpapiGScholarCite(::Abstract)
@@ -84,7 +84,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         response_parse = JSON.parse(response)
         if (!haskey(response_parse, "organic_results") ||
             !haskey(response_parse["organic_results"][1]["inline_links"], "cited_by"))
-            @warn "Received a response, but something wrong" abstract.title start n_response_total queryID(query_string*"$start")
+            @debug "Received a response, but something wrong" abstract.title start n_response_total queryID(query_string*"$start")
             break
         end
 
