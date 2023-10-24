@@ -39,7 +39,7 @@ function hindex(author::Researcher)::TimeArray
                 push!(citation_count_per_abstract, values(to(abstract.scopus_citation_count, date))[end])
             end
         end
-        hindex_at_date = calcHIndex(citation_count_per_abstract)
+        hindex_at_date = hindex(citation_count_per_abstract)
         if hindex_at_date > hindex_current
             hindex_current = hindex_at_date
             push!(hindex_values, hindex_at_date)

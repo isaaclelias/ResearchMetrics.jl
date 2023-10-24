@@ -1,6 +1,5 @@
 export Researcher
-export hindex, articles, prizes, citationcountat, citations, citationdates, hindexat, mapcitations
-export setAuthoredAbstracts!, setCitations!, getCitationDates
+export hindex, articles, prizes, citationcountat, citations, citationdates, hindexat, mapcitations, mappublications
 
 """
 Stores informations about the author based on a database query.

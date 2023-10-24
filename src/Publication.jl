@@ -58,11 +58,14 @@ mutable struct Publication
 end
 Base.@deprecate_binding Abstract Publication
 
+#=
 function setBasicInfo!(abstract::Abstract; only_local::Bool=false)::Nothing
     setScopusSearch!(abstract, only_local=only_local)
     return nothing
 end
+=#
 
+#=
 function setCitationsBasicInfo!(abstract::Abstract; only_local::Bool=false)::Nothing
     if isnothing(abstract.scopus_citations)
         @debug "No citations set for" abstract.title
@@ -73,24 +76,23 @@ function setCitationsBasicInfo!(abstract::Abstract; only_local::Bool=false)::Not
     end
     return nothing
 end
+=#
 
 """
-    getCitationDates(::Abstract)::Vector{Date}
+    citationdates(::Publication)::Vector{Date}
 
 NOT TESTED
 Returns all the dates that the given abstract was cited.
 """
-function citationdates(abstract::Abstract)::Union{Vector{Date}, Nothing}
+function citationdates(abstract::Publication)::Union{Vector{Date}, Nothing}
     # Do we have the data?
     if isnothing(abstract.scopus_citations)
-        @error "No citations set" abstract.title
         return nothing
     end
 
     citation_dates = Vector{Date}()
     for citation in abstract.scopus_citations
         if !isnothing(citation.date_pub)
-            @debug citation.date_pub
             push!(citation_dates, citation.date_pub)
         end
     end

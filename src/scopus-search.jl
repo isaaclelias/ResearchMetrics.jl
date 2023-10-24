@@ -35,6 +35,8 @@ function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bo
 end
 @deprecate queryScopusSearch(query_string::String, start::Int=0; only_local::Bool=false, in_a_hurry::Bool=false) _requestScopusSearch(query_string, start=0, only_local=only_local, in_a_hurry=in_a_hurry)
 
+
+
 """
 - write!
 
@@ -45,14 +47,15 @@ Tasks:
 - Iterate over the list of received objects and populate the Vector{Abstract}
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
-function getAuthoredPublicationsWithScopusSearch(author::Author; 
-                                                 only_local::Bool=false,
-                                                 progress_bar::Bool=false)::Vector{Abstract}
+function ScopusSearch(author::Author; 
+                      only_local::Bool=false,
+                      progress_bar::Bool=false,
+                      in_a_hurry=false)
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()
     while true
-        response = queryScopusSearch(query_string, start, only_local=only_local)
+        response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=false)
         response_parse = JSON.parse(response)
         # Setting the values
         # debugging
@@ -71,7 +74,7 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
             abstract.scopus_scopusid   = parse(Int, scopus_scopusid)
             ## Setting the DOI if it's present
             #abstract.doi               = result["prism:doi"]
-            setBasicInfo!(abstract, only_local=only_local)
+            #setBasicInfo!(abstract, only_local=only_local)
             push!(authored_abstracts, abstract)
         end
         # Do we need totalResults query again?
@@ -100,7 +103,7 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
 end
 
 function setScopusSearch!(author::Author; only_local::Bool=false, progress_bar=false)::Nothing
-    author.abstracts = getAuthoredPublicationsWithScopusSearch(author, only_local=only_local, progress_bar=progress_bar)
+    author.abstracts = ScopusSearch(author, only_local=only_local, progress_bar=progress_bar)
     return nothing
 end
 @deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)
@@ -137,4 +140,29 @@ function setScopusSearch!(abstract::Abstract; only_local::Bool)::Nothing
             return nothing
         end
     end
-  end
+end
+
+#=
+#Maybe wrap it in a type?
+struct ScopusSearch <: AbstractVector{Abstract}
+    results::Vector{Abstract}
+    start::Int
+end
+
+
+function getindex(x::ScopusSearch, i)
+    x.results[i]
+end
+
+function firstindex(x::ScopusSearch)
+    x.results[first]
+end
+
+function lastindex(x::ScopusSearch)
+    x.results[end]
+end
+
+function size(x::ScopusSearch)
+    size(x.results)
+end
+=#
