@@ -104,3 +104,38 @@ function setScopusSearch!(author::Author; only_local::Bool=false, progress_bar=f
     return nothing
 end
 @deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)
+
+"""
+    setScopusData!(::Abstract; only_local::Bool)::Nothing
+
+Uses the Scopus Abstract Retrieval API to get data. If a Copus ID is `nothing`, tries to set it based on the article's title.
+"""
+function setScopusSearch!(abstract::Abstract; only_local::Bool)::Nothing
+    @debug "Setting basic information from Scopus for" abstract.title abstract.scopus_scopusid
+
+    # Does it have a scopusid set? If not:
+    if isnothing(abstract.scopus_scopusid)
+        # Querying scopus
+        title = join(split(lowercase(abstract.title), " "), "+AND+")
+        query_string_title = "TITLE("*title*")"
+        response = queryScopusSearch(query_string_title, only_local=only_local)
+        # Do I have a response?
+        if isnothing(response)
+            @warn "Couldn't find scopus_id" abstract.title query_string_title queryID(query_string_title)
+            return nothing
+        end
+        # Parsing the response into the Abstract
+        response_parse = JSON.parse(response)
+        if haskey(response_parse["search-results"]["entry"][1], "prism:url")
+            @debug "Number of results while trying to set Scopus ID" length(response_parse["search-results"]["entry"])
+            scopusid = response_parse["search-results"]["entry"][1]["prism:url"]
+            scopusid = replace(scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
+            abstract.scopus_scopusid = parse(Int, scopusid)
+            @debug "Scopus ID set succesfully?" abstract.title abstract.scopus_scopusid
+        else
+            @debug "Couldn't find information on Scopus Search for" abstract.title
+            return nothing
+        end
+    end
+
+

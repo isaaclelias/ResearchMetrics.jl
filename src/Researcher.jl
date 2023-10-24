@@ -1,5 +1,5 @@
 export Researcher
-export hindex, articles, prizes, citationcountat, citations, citationdates, hindexat
+export hindex, articles, prizes, citationcountat, citations, citationdates, hindexat, mapcitations
 export setAuthoredAbstracts!, setCitations!, getCitationDates
 
 """
