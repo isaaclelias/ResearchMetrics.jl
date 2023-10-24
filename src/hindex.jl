@@ -74,7 +74,7 @@ end
 Tasks:
 - Better names for the variables please
 """
-function _sethindex!(author::Author)::Nothing
+function _sethindex!(author::Researcher)::Nothing
     abstracts = author.abstracts
     all_citation_dates = getCitationDates(author) # Getting a list of all publication dates
     hindex_current = 0

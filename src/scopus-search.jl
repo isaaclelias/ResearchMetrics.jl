@@ -46,8 +46,8 @@ Tasks:
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
 function getAuthoredPublicationsWithScopusSearch(author::Author; 
-                                    only_local::Bool=false,
-                                    progress_bar::Bool=false)::Vector{Abstract}
+                                                 only_local::Bool=false,
+                                                 progress_bar::Bool=false)::Vector{Abstract}
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()
@@ -75,10 +75,21 @@ function getAuthoredPublicationsWithScopusSearch(author::Author;
             setBasicInfo!(abstract, only_local=only_local)
             push!(authored_abstracts, abstract)
         end
-        # Do we need to query again?
+        # Do we need totalResults query again?
         n_result = length(response_parse["search-results"]["entry"])
         start = start+n_result
         n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
+        
+        # ProgressBar
+        lock = 1
+        if progress_bar
+            if lock == 0
+                prog = ProgressBar(total=n_result_total)
+                lock = 1
+            end
+            ProgressBars.update(prog, start)
+        end
+
         if start >= n_result_total
             break
         end
