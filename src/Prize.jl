@@ -1,8 +1,12 @@
-using Dates
+export Prize
 
 struct Prize
     name::String
     date::Date
+end
+
+function Prize(name, date::String)
+    Prize(name, Date(date))
 end
 
 function name(prize::Prize)

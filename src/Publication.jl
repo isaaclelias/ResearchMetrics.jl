@@ -132,6 +132,24 @@ function citations(article::Abstract; skip_self::Bool=false)
     end
 end
 
+function citationcount(publication::Publication)::Union{TimeArray, Nothing}
+    citation_dates = citationdates(publication)
+    if !isnothing(citation_dates)
+        onetolength = [i for i=1:length(citation_dates)]
+        return TimeArrayTimeArray(citation_dates, onetolength)
+    else
+        return nothing
+    end
+end
+
 function citationcountat(article::Abstract, date::Date)::Int
     article.scopus_citation_count
+end
+
+function mapcitations(func, publication::Publication)
+    if !isnothing(publication.scopus_citations)
+        map(func, publication.scopus_citations)
+    else
+        return nothing
+    end
 end

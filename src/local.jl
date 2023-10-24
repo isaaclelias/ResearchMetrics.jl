@@ -3,6 +3,24 @@ function _uniqueidentifierSHA(unique_identifier::String)::String
 end
 @deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
 
+"""
+    saveQuery(query_type::String, query_string::String)::Nothing
+
+Saves the result to disk.
+"""
+function saveQuery(query_type::String, query_string::String, response::String)::Nothing
+    fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*queryID(query_string)*".json"
+    fpath = api_query_folder*fname
+    touch(fpath)
+    open(fpath, "w") do file
+        write(file, response)
+        @debug "Query saved to disk" fpath
+    end
+
+    return nothing
+end
+
+
 
 """
     localQuery(::String)::String
@@ -39,7 +57,7 @@ function queryKnownToFault(query_type::String, query_string::String)::Bool
     open(fpath, "r") do file
         faulted_queries = read(file, String)
         if occursin(query_type*"-"*queryID(query_string), faulted_queries)
-            @info "The query has failed previously" query_type*"-"*query_string
+            @debug "The query has failed previously" query_type*"-"*query_string
             return true
         else
             return false

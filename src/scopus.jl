@@ -7,3 +7,4 @@ scopusSearch_fprefix = "Scopus-Search"
 include("scopus-search.jl")
 include("scopus-abstract-retrieval.jl")
 include("scopus-author-retrieval.jl")
+include("scopus-author-search.jl")

@@ -19,12 +19,12 @@ using ProgressBars
 
 
 include("secrets.jl")
-include("abstract.jl")
-include("prize.jl")
-include("author.jl")
+include("Publication.jl")
+include("Prize.jl")
+include("Researcher.jl")
 include("local.jl")
 include("scopus.jl")
-include("scholar.jl")
+include("serpapi.jl")
 include("hindex.jl")
 
 end #module

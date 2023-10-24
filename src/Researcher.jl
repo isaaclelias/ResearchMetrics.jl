@@ -19,9 +19,8 @@ mutable struct Researcher
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
 
-    abstracts::Union{Vector{Publication}, Nothing}
+    abstracts::Union{Vector{Publication}, Nothing} # refactor to publications
     prizes::Union{Vector{Prize}, Nothing}
-    hindex::Union{TimeArray, Nothing}
 
     # Scopus
     ## Basic info
@@ -38,33 +37,34 @@ mutable struct Researcher
     orcid_id::Union{String, Nothing}
 
     # Enforce that `Author` has at least these two fields filled up
-    function Researcher(lastname::String, affiliation::String)
+    function Researcher(lastname::String, affiliation::String; prizes=nothing)
         author = new(ntuple(x->nothing, fieldcount(Author))...)
         author.lastname = lastname
         author.affiliation = affiliation
+        author.prizes = prizes
         return author
     end
 end
 Base.@deprecate_binding Author Researcher
 
+#=
 function setBasicInfo!(author::Author; only_local::Bool=false)::Nothing
     setBasicInfoFromScopus!(author, only_local=only_local)
 end
+=#
 
+#=
 function setCitationsBasicInfo!(author::Author; only_local::Bool=false)::Nothing
     for i in 1:length(author.abstracts)
-        setCitationsBasicInfo!(author.abstracts[i], only_local=only_local)
+        setCitationsBasicInfo!(author.abstracts[i], only_local=only_local)  
     end
 end
+=#
 
-function citationdates(author::Author)::Vector{Date}
+function citationdates(author::Researcher)::Vector{Date}
     all_citation_dates = Vector{Date}()
     for abstract in author.abstracts
-        if isnothing(abstract.scopus_citation_count)
-            setCitationCount!(abstract)
-        end
-        citation_dates = getCitationDates(abstract)
-        @debug citation_dates
+        citation_dates = citationdates(abstract)
         if !isnothing(citation_dates)
             append!(all_citation_dates, citation_dates)
         end
@@ -74,8 +74,14 @@ function citationdates(author::Author)::Vector{Date}
 end
 @deprecate getCitationDates(author::Author) citationdates(author)
 
-function citationcountat(author::Author, date::Date)::Int
-    error("Not implemented")
+function citationcount(researcher::Researcher)::TimeArray
+    citation_dates = citationdates(researcher)
+    if !isnothing(citation_dates)
+        onetolength = [i for i=1:length(citation_dates)]
+        return TimeArray(citation_dates, onetolength)
+    else
+        return nothing
+    end    
 end
 
 function articles(author::Author)
@@ -86,21 +92,12 @@ function prizes(author::Author)
     return author.prizes
 end
 
-function hindex(author::Author)
-  if !isnothing(author.hindex)
-      return author.scopus_hindex
-  else
-      _sethindex!(author)
-      return author.scopus_hindex
-  end
+function mappublications(func, researcher::Researcher)
+    map(func, researcher.abstracts)
 end
 
-function hindexat(author::Author, date::Author)::Int
-    error("Not implemented") 
-end
-
-function mapcitations(func, destination::Researcher)
-    map(func, destination.citations)
+function mapcitations(func, researcher::Researcher)
+  mappublications(abstract -> mapcitations(func, abstract), researcher.abstracts)
 end
 
 

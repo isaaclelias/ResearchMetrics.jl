@@ -137,5 +137,4 @@ function setScopusSearch!(abstract::Abstract; only_local::Bool)::Nothing
             return nothing
         end
     end
-
-
+  end
