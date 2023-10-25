@@ -18,7 +18,7 @@ mutable struct Publication
     # Scholar
     scholar_citesid::Union{String, Nothing, Missing}
     # Should be refactored to be not scopus only
-    scopus_citations::Union{Vector{Publication}, Nothing} # Refactor to `citing_articles`
+    scopus_citations::Union{Vector{Publication}, Nothing} # Refactor to `citing_articles, refactor to only Vector{Publication}`
     # Where is it listed?
     found_in_scopus::Union{Bool, Nothing}
     found_in_scholar::Union{Bool, Nothing}
@@ -101,11 +101,11 @@ end
 @deprecate setCitationCount!(article::Abstract) _setcitationcount!(abstract)
 =#
 
-function citations(article::Abstract; skip_self::Bool=false)
-    if skip_self
-        error("Not implemented")
-    else
+function citations(article::Publication)
+    if !isnothing(article.scopus_citations)
         return article.scopus_citations
+    else
+        return Vector{Publication}()
     end
 end
 

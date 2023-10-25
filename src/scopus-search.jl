@@ -48,32 +48,47 @@ function scopussearch(author::Author;
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()
+
+    # Set iteration
+    response = ""
+    response_parse = Dict()
     try
         response = _requestScopusSearch(query_string, only_local=only_local, in_a_hurry=in_a_hurry)
         response_parse = JSON.parse(response)
-        n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
-        if n_result_total > 240; n_result_total = 240; end # Limiting the amount of abstracts queried REFACTOR THIS ATROCITY
-        start_offsets = 0:scopus_nresultsperpage:n_result_total
-        if progress_bar; start_offsets = ProgressBar(1:n_result_total); end
-        for start in start_offsets
+    catch y
+        @debug y
+    end
+    n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
+    if n_result_total > 240; n_result_total = 240; end # Limiting the amount of abstracts queried REFACTOR THIS ATROCITY
+    start_offsets = 0:scopus_nresultsperpage:n_result_total
+    if progress_bar; start_offsets = ProgressBar(1:n_result_total); end
+    for start in start_offsets
+        response_iter = 0
+        try
             response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=in_a_hurry)
             response_parse = JSON.parse(response)
             response_iter = enumerate(response_parse["search-results"]["entry"])
-            for (i, result) in response_iter
-                abstract = Publication(result["dc:title"])
+            @debug response response_parse response_iter
+        catch y
+            @debug "aqui" y
+            continue
+        end
+        for (i, result) in response_iter
+            abstract = Publication()
+            try # eventually the results come with messed up fields
+                abstract.title = result["dc:title"]
                 # Setting the fields
                 ## Triming the abstract url to get the id
                 scopus_scopusid           = result["prism:url"]
                 scopus_scopusid           = replace(scopus_scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
                 abstract.scopus_scopusid  = parse(Int, scopus_scopusid)
                 ## Setting the DOI if it's present
-                abstract.doi               = result["prism:doi"]
-                push!(authored_abstracts, abstract)
+                #abstract.doi               = result["prism:doi"]
+            catch y
+                @debug y
             end
+            push!(authored_abstracts, abstract)
         end
-    catch y
-        # No entries found on Scopus Search answer
-        @debug y
     end
     return authored_abstracts
 end

@@ -16,7 +16,7 @@ mutable struct Researcher
     firstname::Union{String, Nothing}
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
-    abstracts::Union{Vector{Publication}, Nothing} # refactor to publications
+    abstracts::Union{Vector{Publication}, Nothing} # refactor to publications, refactor to only Vector{publications}
     prizes::Union{Vector{Prize}, Nothing}
     # Scopus
     ## Basic info
@@ -68,7 +68,10 @@ end
 function totalcitationcount(researcher::Researcher)::Int 
     n_citations = 0
     for publication in publications(researcher)
-        n_citations += length(citations(publication))
+        pub_citations = citations(publication)
+        if !isnothing(pub_citations)
+            n_citations += length(citations(publication))
+        end
     end
     return n_citations
 end
@@ -82,7 +85,7 @@ function prizes(author::Author)
 end
 
 function mappublications(func, researcher::Researcher; progress_bar::Bool=false)
-    iter = publications(researcher)
+    iter = enumerate(publications(researcher))
     destination = []
     if progress_bar; iter = ProgressBar(iter); end
     for (i, publication) in iter
@@ -98,8 +101,8 @@ function mapcitations(func, researcher::Researcher; progress_bar=false)
     progress = ProgressBar(total=totalcitationcount(researcher))
     for (i, publication) in enumerate(publications(researcher))
         for (j, citation) in enumerate(citations(publication))
-          ProgressBar.update(progress)
-          push!(destination, func(researcher.abstracts[i].citations[j]))
+          ProgressBars.update(progress)
+          push!(destination, func(researcher.abstracts[i].scopus_citations[j]))
         end
     end
     return destination
