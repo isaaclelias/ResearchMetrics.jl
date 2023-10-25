@@ -11,14 +11,10 @@ function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bo
         end
         # Preparing API 
         endpoint = "https://api.elsevier.com/content/search/scopus"
-        headers = [
-                   "Accept" => "application/json",
-                   "X-ELS-APIKey" => scopus_api_key
-                  ]
-        params = [
-                  "query" => formatted_query_string,
-                  "start" => "$start"
-                  ]
+        headers = ["Accept" => "application/json",
+                   "X-ELS-APIKey" => scopus_api_key]
+        params = ["query" => formatted_query_string,
+                  "start" => "$start"]
         try
             if !in_a_hurry; sleep(0.5); end # Sleep for half a second to avoid receiving a TOO MANY REQUESTS
             response = HTTP.get(endpoint, headers; query=params).body |> String
@@ -46,53 +42,44 @@ Tasks:
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
 function scopussearch(author::Author; 
-                     only_local::Bool=false,
-                     progress_bar::Bool=false,
-                     in_a_hurry=false)::Vector{Publication}
+                      only_local=false,
+                      progress_bar::Bool=false,
+                      in_a_hurry=false)::Vector{Publication}
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()
-    while true
-        response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=false)
-        try
-            response_parse = JSON.parse(response)
-            response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=false)
-
-        catch y
-
-        end
-        # Setting the values
-        if !haskey(response_parse["search-results"], "entry")
-            @debug "No entries found on Scopus Search answer" query_string*" start=$start"
-            break
-        end
-        iter = enumerate(response_parse["search-results"]["entry"])
-        for (i, result) in iter
-            abstract = Publication(result["dc:title"])
-            # Setting the fields
-            ## Triming the abstract url to get the id
-            scopus_scopusid                         = result["prism:url"]
-            scopus_scopusid                         = replace(scopus_scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
-            abstract.scopus_scopusid   = parse(Int, scopus_scopusid)
-            ## Setting the DOI if it's present
-            #abstract.doi               = result["prism:doi"]
-            #setBasicInfo!(abstract, only_local=only_local)
-            push!(authored_abstracts, abstract)
-        end
-        # Do we need totalResults query again?
-        n_result = length(response_parse["search-results"]["entry"])
-        start = start+n_result
+    try
+        response = _requestScopusSearch(query_string, only_local=only_local, in_a_hurry=in_a_hurry)
+        response_parse = JSON.parse(response)
         n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
-               if start >= n_result_total
-            break
+        if n_result_total > 240; n_result_total = 240; end # Limiting the amount of abstracts queried REFACTOR THIS ATROCITY
+        start_offsets = 0:scopus_nresultsperpage:n_result_total
+        if progress_bar; start_offsets = ProgressBar(1:n_result_total); end
+        for start in start_offsets
+            response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=in_a_hurry)
+            response_parse = JSON.parse(response)
+            response_iter = enumerate(response_parse["search-results"]["entry"])
+            for (i, result) in response_iter
+                abstract = Publication(result["dc:title"])
+                # Setting the fields
+                ## Triming the abstract url to get the id
+                scopus_scopusid           = result["prism:url"]
+                scopus_scopusid           = replace(scopus_scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
+                abstract.scopus_scopusid  = parse(Int, scopus_scopusid)
+                ## Setting the DOI if it's present
+                abstract.doi               = result["prism:doi"]
+                push!(authored_abstracts, abstract)
+            end
         end
-        @debug "Querying for another Scopus Search results page"
+    catch y
+        # No entries found on Scopus Search answer
+        @debug y
     end
     return authored_abstracts
 end
 
 function setScopusSearch!(author::Author; only_local::Bool=false, progress_bar=false)::Nothing
-    author.abstracts = ScopusSearch(author, only_local=only_local, progress_bar=progress_bar)
+    author.abstracts = scopussearch(author, only_local=only_local, progress_bar=progress_bar)
     return nothing
 end
 @deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)
