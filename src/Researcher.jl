@@ -65,7 +65,15 @@ function citationcount(researcher::Researcher)::TimeArray
     end    
 end
 
-function articles(author::Author)
+function totalcitationcount(researcher::Researcher)::Int 
+    n_citations = 0
+    for publication in publications(researcher)
+        n_citations += length(citations(publication))
+    end
+    return n_citations
+end
+
+function publications(author::Author)
     return author.abstracts
 end
 
@@ -74,44 +82,26 @@ function prizes(author::Author)
 end
 
 function mappublications(func, researcher::Researcher; progress_bar::Bool=false)
-    iter = articles(researcher)
+    iter = publications(researcher)
     destination = []
     if progress_bar; iter = ProgressBar(iter); end
     for (i, publication) in iter
-        push!(destination, func(researcher[i]))   
+        push!(destination, func(researcher.abstracts[i]))   
     end
     return destination
 end
 
-function mapcitations(func, researcher::Researcher, progress_bar)
-    mappublications(abstract -> mapcitations(func, abstract), researcher.abstracts)
+function mappublications!(func, destination::Researcher, collection); end
 
-    iter = researcher.abstracts
+function mapcitations(func, researcher::Researcher; progress_bar=false)
+    destination = []
+    progress = ProgressBar(total=totalcitationcount(researcher))
+    for (i, publication) in enumerate(publications(researcher))
+        for (j, citation) in enumerate(citations(publication))
+          ProgressBar.update(progress)
+          push!(destination, func(researcher.abstracts[i].citations[j]))
+        end
+    end
+    return destination
 end
-
-
-#=
-"""
-    getScopusCitingAbstracts(::Abstract)::Vector{Abstract}
-
-Queries scopus for a list of abstracts that cite the given abstract
-"""
-function setScopusCitingAbstracts(abstract::Abstract)#::Vector{Abstract}
-    @warn "getScopusCitingAbstracts not implemented"
-    # Preparing API 
-    endpoint = "https://api.elsevier.com/content/search/scopus"
-    headers = [
-               "Accept" => "application/json",
-               "X-ELS-APIKey" => scopus_api_key
-              ]
-    #query_string = "REFEID($(abstract.scopus_scopusid))" # APIKey doesn't have privileges
-    query_string = "REFEID($(abstract.scopus_scopusid))"
-    params = ["query" => query_string]
-    @info "Querying Scopus Search for arcticles that cite" abstract.title
-    response = HTTP.get(endpoint, headers; query=params).body |> String
-    response_parse = JSON.parse(response)
-
-    #abstract.citations = ::Vector{Abstract}
-end
-=#
 
