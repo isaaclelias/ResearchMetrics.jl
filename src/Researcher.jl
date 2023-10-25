@@ -1,5 +1,5 @@
 export Researcher
-export hindex, articles, prizes, citationcountat, citations, citationdates, hindexat, mapcitations, mappublications
+export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
 
 """
 Stores informations about the author based on a database query.
@@ -99,10 +99,11 @@ function mappublications!(func, destination::Researcher, collection); end
 function mapcitations(func, researcher::Researcher; progress_bar=false)
     destination = []
     progress = ProgressBar(total=totalcitationcount(researcher))
-    for (i, publication) in enumerate(publications(researcher))
+    Threads.@threads for (i, publication) in collect(enumerate(publications(researcher))) # REFACTOR!!!!!! NOT RACE-CONDITION FREE
         for (j, citation) in enumerate(citations(publication))
           ProgressBars.update(progress)
-          push!(destination, func(researcher.abstracts[i].scopus_citations[j]))
+          func(researcher.abstracts[i].scopus_citations[j])
+          #push!(destination, func(researcher.abstracts[i].scopus_citations[j]))
         end
     end
     return destination

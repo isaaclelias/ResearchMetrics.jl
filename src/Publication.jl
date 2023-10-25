@@ -113,7 +113,7 @@ function citationcount(publication::Publication)::Union{TimeArray, Nothing}
     citation_dates = citationdates(publication)
     if !isnothing(citation_dates)
         onetolength = [i for i=1:length(citation_dates)]
-        return TimeArrayTimeArray(citation_dates, onetolength)
+        return TimeArray(citation_dates, onetolength)
     else
         return nothing
     end

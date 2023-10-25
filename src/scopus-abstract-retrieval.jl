@@ -1,6 +1,6 @@
 export setScopusAbstractRetrieval!
 
-function requestScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
+function _requestScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     response = ""
     local_query = localQuery(scopusAbstractRetrieval_fprefix, query_string)
     if !isnothing(local_query)
@@ -27,7 +27,7 @@ function requestScopusAbstractRetrieval(query_string::String; only_local::Bool=f
         return nothing
     end
 end
-@deprecate queryScopusAbstractRetrieval(query_string; only_local=false, in_a_hurry=false) requestScopusAbstractRetrieval(query_string)
+@deprecate queryScopusAbstractRetrieval(query_string; only_local=false, in_a_hurry=false) _requestScopusAbstractRetrieval(query_string)
 
 """
     setScopusData!(::Abstract; only_local::Bool)::Nothing
@@ -61,7 +61,7 @@ function setScopusAbstractRetrieval!(abstract::Abstract; only_local::Bool=false)
         end
     end
     query_string = string(abstract.scopus_scopusid)
-    response = queryScopusAbstractRetrieval(query_string, only_local=only_local)
+    response = _requestScopusAbstractRetrieval(query_string, only_local=only_local)
     if isnothing(response)
         @debug "Couldn't set information on Scopus Abstract Retrieval, no response from Scopus Abstract Retrieval" abstract.title abstract.scopus_scopusid queryID(query_string)
         return nothing

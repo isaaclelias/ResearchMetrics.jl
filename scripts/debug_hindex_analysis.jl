@@ -1,6 +1,15 @@
 include("../src/ResearchMetrics.jl")
 using .ResearchMetrics
+using Logging, LoggingExtras
 using Dates
+using Eyeball
+
+io_path = "logs/hindex_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
+touch(io_path)
+io = open(io_path, "w+")
+logger = TeeLogger(ConsoleLogger(stdout, Logging.Info),
+                   SimpleLogger(io, Logging.Debug))
+global_logger(logger)
 
 researcher = Researcher("Rattman", "Aperture Science")
 publications = [Publication("Morality Core",
@@ -22,6 +31,18 @@ researchers = [
     #Author("rosch", "universität zu köln") # Survey 7
 ]
 
-setScopusAuthorSearch!.(researchers)
-setAuthoredPublicationsWithScopusSearch!.(researchers)
-setCitationsWithSerpapiGScholarCite!.(researchers)
+function setinfoforhindex!(researcher::Researcher)
+    println("Setting researcher info with Scopus Author Search")
+    setScopusAuthorSearch!(researcher, only_local=true)
+    println("Setting researcher publications with Scopus Search")
+    setScopusSearch!(researcher, progress_bar=true, only_local=true)
+    println("Setting information from Scopus Abstract Retrieval for each researcher's publications")
+    mappublications(x -> setScopusAbstractRetrieval!(x, only_local=true), researcher, progress_bar=true)
+    println("Setting citations for each researcher's publication with Serpapi Google Scholar Cite")
+    mappublications(x -> setSerpapiGScholarCite!(x, only_local=true), researcher, progress_bar=true)
+    println("Setting information from Scopus Abstract Retrieval for each researcher's citations")
+    mapcitations(x -> setScopusAbstractRetrieval!(x, only_local=true), researcher, progress_bar=true)
+end
+
+setinfoforhindex!(researchers[1])
+eye(researchers[1])

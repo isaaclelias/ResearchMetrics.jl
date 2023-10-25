@@ -1,4 +1,5 @@
 export Prize
+export dateof, nameof
 
 struct Prize
     name::String
@@ -9,10 +10,10 @@ function Prize(name, date::String)
     Prize(name, Date(date))
 end
 
-function name(prize::Prize)
+function nameof(prize::Prize)
     prize.name
 end
 
-function date(prize::Prize)
+function dateof(prize::Prize)
     prize.date
 end

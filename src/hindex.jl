@@ -1,4 +1,5 @@
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
+export hindex
 
 sha_length = 20
 api_query_folder = "resources/extern/"
@@ -27,16 +28,17 @@ Tasks:
 - Better names for the variables please
 """
 function hindex(author::Researcher)::TimeArray
-    abstracts = author.abstracts
-    all_citation_dates = getCitationDates(author) # Getting a list of all publication dates
+    abstracts = publications(author)
+    all_citation_dates = citationdates(author) # Getting a list of all publication dates
     hindex_current = 0
     hindex_values = Vector{Int}()
     hindex_dates = Vector{Date}()
     for date in all_citation_dates
         citation_count_per_abstract = Vector{Int}()
         for abstract in abstracts
-            if !isnothing(abstract.scopus_citation_count) && length(values(to(abstract.scopus_citation_count, date))) > 0
-                push!(citation_count_per_abstract, values(to(abstract.scopus_citation_count, date))[end])
+            if length(values(to(citationcount(abstract), date))) > 0
+                abstract_citation_count_at_date = values(to(citationcount(abstract), date))[end]
+                push!(citation_count_per_abstract, abstract_citation_count_at_date)
             end
         end
         hindex_at_date = hindex(citation_count_per_abstract)
@@ -46,7 +48,7 @@ function hindex(author::Researcher)::TimeArray
             push!(hindex_dates, date)
         end
     end
-    hindex = TimeArray(hindex_dates, hindex_values)
-    return hindex
+    h_index = TimeArray(hindex_dates, hindex_values)
+    return h_index
 end
 

@@ -17,7 +17,6 @@ using Dates
 using SHA
 using ProgressBars
 
-
 include("secrets.jl")
 include("Publication.jl")
 include("Prize.jl")

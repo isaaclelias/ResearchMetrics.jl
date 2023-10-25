@@ -4,7 +4,7 @@ end
 @deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
 
 function saveQuery(query_type::String, query_string::String, response::String)::Nothing
-    fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*queryID(query_string)*".json"
+    fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*_uniqueidentifierSHA(query_string)*".json"
     fpath = api_query_folder*fname
     touch(fpath)
     open(fpath, "w") do file
@@ -15,7 +15,7 @@ function saveQuery(query_type::String, query_string::String, response::String)::
 end
 
 function localQuery(query_type::String, query_string::String)::Union{String, Nothing}
-    regex = Regex(query_type*".*"*queryID(query_string))
+    regex = Regex(query_type*".*"*_uniqueidentifierSHA(query_string))
     what_we_have = readdir(api_query_folder)
     what_we_have = filter(s-> occursin(regex, s), what_we_have)
     if !isempty(what_we_have)
@@ -39,7 +39,7 @@ function queryKnownToFault(query_type::String, query_string::String)::Bool
     touch(fpath)
     open(fpath, "r") do file
         faulted_queries = read(file, String)
-        if occursin(query_type*"-"*queryID(query_string), faulted_queries)
+        if occursin(query_type*"-"*_uniqueidentifierSHA(query_string), faulted_queries)
             @debug "The query has failed previously" query_type*"-"*query_string
             return true
         else
