@@ -45,10 +45,10 @@ Tasks:
 - Iterate over the list of received objects and populate the Vector{Abstract}
 - Do a double check wheater the received abstracts indeed are authored by the given author
 """
-function ScopusSearch(author::Author; 
-                      only_local::Bool=false,
-                      progress_bar::Bool=false,
-                      in_a_hurry=false)
+function scopussearch(author::Author; 
+                     only_local::Bool=false,
+                     progress_bar::Bool=false,
+                     in_a_hurry=false)::Vector{Publication}
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()

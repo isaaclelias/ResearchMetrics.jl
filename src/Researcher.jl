@@ -12,15 +12,12 @@ Tasks:
 - Refactor `scopus_FIELD` to `FIELD`
 """
 mutable struct Researcher
-
     # Basic info
     firstname::Union{String, Nothing}
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
-
     abstracts::Union{Vector{Publication}, Nothing} # refactor to publications
     prizes::Union{Vector{Prize}, Nothing}
-
     # Scopus
     ## Basic info
     scopus_authid::Union{Int, Nothing}
@@ -31,7 +28,6 @@ mutable struct Researcher
     scopus_query_nresults::Union{String, Nothing}
     scopus_query_string::Union{String, Nothing}
     ## Authored
-
     # ORCID
     orcid_id::Union{String, Nothing}
 
@@ -45,20 +41,6 @@ mutable struct Researcher
     end
 end
 Base.@deprecate_binding Author Researcher
-
-#=
-function setBasicInfo!(author::Author; only_local::Bool=false)::Nothing
-    setBasicInfoFromScopus!(author, only_local=only_local)
-end
-=#
-
-#=
-function setCitationsBasicInfo!(author::Author; only_local::Bool=false)::Nothing
-    for i in 1:length(author.abstracts)
-        setCitationsBasicInfo!(author.abstracts[i], only_local=only_local)  
-    end
-end
-=#
 
 function citationdates(author::Researcher)::Vector{Date}
     all_citation_dates = Vector{Date}()
@@ -91,12 +73,20 @@ function prizes(author::Author)
     return author.prizes
 end
 
-function mappublications(func, researcher::Researcher)
-    map(func, researcher.abstracts)
+function mappublications(func, researcher::Researcher; progress_bar::Bool=false)
+    iter = articles(researcher)
+    destination = []
+    if progress_bar; iter = ProgressBar(iter); end
+    for (i, publication) in iter
+        push!(destination, func(researcher[i]))   
+    end
+    return destination
 end
 
-function mapcitations(func, researcher::Researcher)
-  mappublications(abstract -> mapcitations(func, abstract), researcher.abstracts)
+function mapcitations(func, researcher::Researcher, progress_bar)
+    mappublications(abstract -> mapcitations(func, abstract), researcher.abstracts)
+
+    iter = researcher.abstracts
 end
 
 
