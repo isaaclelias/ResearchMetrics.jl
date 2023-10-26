@@ -17,6 +17,19 @@ using Dates
 using SHA
 using ProgressBars
 
+export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
+export hindex
+export Prize
+export dateof, nameof
+export Publication
+export setBasicInfo!, setCitations!, setCitationsBasicInfo!
+export Researcher
+export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
+export setScopusAbstractRetrieval!
+export setScopusAuthorSearch!
+export setScopusSearch!
+export setScopusApiKey, setScopusSearchData!, getCitationDates
+
 include("secrets.jl")
 include("Publication.jl")
 include("Prize.jl")

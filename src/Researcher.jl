@@ -1,6 +1,3 @@
-export Researcher
-export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
-
 """
 Stores informations about the author based on a database query.
 

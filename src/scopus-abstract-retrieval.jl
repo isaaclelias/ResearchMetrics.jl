@@ -1,5 +1,3 @@
-export setScopusAbstractRetrieval!
-
 function _requestScopusAbstractRetrieval(query_string::String; only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     response = ""
     local_query = localQuery(scopusAbstractRetrieval_fprefix, query_string)

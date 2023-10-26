@@ -1,9 +1,6 @@
 using Dates
 using TimeSeries
 
-export Publication
-export setBasicInfo!, setCitations!, setCitationsBasicInfo!
-
 """
 Store information about abstracts.
 """

@@ -1,5 +1,3 @@
-export setScopusAuthorSearch!
-
 function _requestScopusAuthorSearch(query_string::String)::String
     local_query = localQuery(scopusAuthorSearch_fprefix, query_string)
     if !isnothing(local_query)

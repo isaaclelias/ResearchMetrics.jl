@@ -1,5 +1,3 @@
-export setScopusSearch!
-
 function _requestScopusSearch(query_string::String; start::Int=0, only_local::Bool=false, in_a_hurry::Bool=false)::Union{String, Nothing}
     formatted_query_string = query_string
     local_query = localQuery(scopusSearch_fprefix, formatted_query_string*"$start")

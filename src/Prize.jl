@@ -1,6 +1,3 @@
-export Prize
-export dateof, nameof
-
 struct Prize
     name::String
     date::Date

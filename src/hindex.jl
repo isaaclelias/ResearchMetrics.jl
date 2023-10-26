@@ -1,6 +1,3 @@
-export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
-export hindex
-
 sha_length = 20
 api_query_folder = "resources/extern/"
 
