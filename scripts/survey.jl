@@ -43,9 +43,9 @@ researchers = [
     Researcher("Merklein",
                "Universität Erlangen-Nürnberg",
                prizes = [Prize("Gottfried Wilhelm Leibniz Prize", "2013-01-01")])
-    Researcher("Eosch",
-               "Universität zu Köln",
-               prizes = [Prize("Gottfried Wilhelm Leibniz Prize", "2013-01-01")])
+    #Researcher("Eosch",
+    #           "Universität zu Köln",
+    #           prizes = [Prize("Gottfried Wilhelm Leibniz Prize", "2013-01-01")])
 ]
 
 function setinfoforhindex!(researcher::Researcher)
