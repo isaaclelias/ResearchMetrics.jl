@@ -10,7 +10,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     # Dealing with lack of information
     ## Nothing
     if isnothing(abstract.scholar_citesid)
-        setBasicFieldsFromSerapiGScholar!(abstract)
+        setBasicFieldsFromSerapiGScholar!(abstract, only_local=true)
     end
     # Missing
     if ismissing(abstract.scholar_citesid)

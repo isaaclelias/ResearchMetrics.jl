@@ -44,16 +44,14 @@ Basic fields:
 """
 function setBasicFieldsFromSerapiGScholar!(abstract::Abstract; only_local::Bool=false)::Nothing
     query_string = abstract.title
-    response_parse = JSON.parse(querySerapiGScholar(query_string, only_local=only_local))
-
     # Tries to set a Cites ID, otherwise assigns missing to indicate that it was already tried
-    if (haskey(response_parse, "organic_results") &&
-        haskey(response_parse["organic_results"][1]["inline_links"], "cited_by"))
+    try
+        response_parse = JSON.parse(querySerapiGScholar(query_string, only_local=only_local))
         abstract.scholar_citesid = response_parse["organic_results"][1]["inline_links"]["cited_by"]["cites_id"]
-    else
+    catch y
+        @debug y
         abstract.scholar_citesid = missing
     end
-
     @debug "Result from setBasicFieldsFromSerapiGScholar" abstract.title abstract.scholar_citesid
     return nothing
 end
