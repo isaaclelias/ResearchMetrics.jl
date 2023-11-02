@@ -41,6 +41,9 @@ Base.@deprecate_binding Author Researcher
 
 function citationdates(author::Researcher)::Vector{Date}
     all_citation_dates = Vector{Date}()
+    if isnothing(author.abstracts)
+        return all_citation_dates
+    end
     for abstract in author.abstracts
         citation_dates = citationdates(abstract)
         if !isnothing(citation_dates)
