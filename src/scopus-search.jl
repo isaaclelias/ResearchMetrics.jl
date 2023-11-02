@@ -30,14 +30,7 @@ end
 @deprecate queryScopusSearch(query_string::String, start::Int=0; only_local::Bool=false, in_a_hurry::Bool=false) _requestScopusSearch(query_string, start=0, only_local=only_local, in_a_hurry=in_a_hurry)
 
 """
-- write!
-
-Issues:
-- It's allocating more space than it needs. Final vector has lots of #undef.
-
-Tasks:
-- Iterate over the list of received objects and populate the Vector{Abstract}
-- Do a double check wheater the received abstracts indeed are authored by the given author
+    scopussearch(::Researcher, only_local=false, progress_bar=false,)
 """
 function scopussearch(author::Author; 
                       only_local=false,
@@ -98,9 +91,11 @@ end
 @deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)
 
 """
-    setScopusData!(::Abstract; only_local::Bool)::Nothing
+    setscopussearch!(::Publication; only_local::Bool)::Nothing
 
-Uses the Scopus Abstract Retrieval API to get data. If a Copus ID is `nothing`, tries to set it based on the article's title.
+Use the Scopus Abstract Retrieval API to get data and set the 
+
+If a Copus ID is `nothing`, tries to set it based on the article's title.
 """
 function setScopusSearch!(abstract::Abstract; only_local::Bool)::Nothing
     @debug "Setting basic information from Scopus for" abstract.title abstract.scopus_scopusid

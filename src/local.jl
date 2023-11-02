@@ -3,7 +3,7 @@ function _uniqueidentifierSHA(unique_identifier::String)::String
 end
 @deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
 
-function saveQuery(query_type::String, query_string::String, response::String)::Nothing
+function _savequery(query_type::String, query_string::String, response::String)::Nothing
     fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*_uniqueidentifierSHA(query_string)*".json"
     fpath = api_query_folder*fname
     touch(fpath)
@@ -13,8 +13,9 @@ function saveQuery(query_type::String, query_string::String, response::String)::
     end
     return nothing
 end
+@deprecate saveQuery(query_type::String, query_string::String, response::String) _savequery(query_type, query_string, response)
 
-function localQuery(query_type::String, query_string::String)::Union{String, Nothing}
+function _localquery(query_type::String, query_string::String)::Union{String, Nothing}
     regex = Regex(query_type*".*"*_uniqueidentifierSHA(query_string))
     what_we_have = readdir(api_query_folder)
     what_we_have = filter(s-> occursin(regex, s), what_we_have)
@@ -29,12 +30,9 @@ function localQuery(query_type::String, query_string::String)::Union{String, Not
         return nothing
     end 
 end
+@deprecate 
 
-function queryLocal(query_type::String, query_min_date::Date, query_id::String)
-  
-end
-
-function queryKnownToFault(query_type::String, query_string::String)::Bool
+function _isqueryknowntofail(query_type::String, query_string::String)::Bool
     fpath = "resources/known-to-fault"
     touch(fpath)
     open(fpath, "r") do file
@@ -47,6 +45,8 @@ function queryKnownToFault(query_type::String, query_string::String)::Bool
         end
     end
 end
+@deprecate queryKnownToFault(query_type::String, query_string::String) _isqueryknowntofail(query_type, query_string)
+ 
 
 function addQueryKnownToFault(query_type::String, query_string::String)::Nothing
     fpath = "resources/known-to-fault"

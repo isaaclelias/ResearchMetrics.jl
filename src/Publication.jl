@@ -2,7 +2,7 @@ using Dates
 using TimeSeries
 
 """
-Store information about abstracts.
+Store information about a publication.
 """
 mutable struct Publication
     title::Union{String, Nothing}

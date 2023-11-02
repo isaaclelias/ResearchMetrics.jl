@@ -2,9 +2,9 @@ sha_length = 20
 api_query_folder = "resources/extern/"
 
 """
-    calcHIndex(::Vector{Int})::Int
+    hindex(::Vector{Int})::Int
 
-Calculates the h-index.
+Calculates the h-index of an array of integers.
 """
 function hindex(citation_count::Vector{Int})::Int
     n = length(citation_count)
@@ -21,8 +21,9 @@ function hindex(citation_count::Vector{Int})::Int
 end
 
 """
-Tasks:
-- Better names for the variables please
+    hindex(::Researcher)::TimeArray
+
+Returns a TimeArray with the h-index of the given researcher in function of time.
 """
 function hindex(author::Researcher)::TimeArray
     abstracts = publications(author)

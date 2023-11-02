@@ -1,3 +1,4 @@
+"Stores information about a prize."
 struct Prize
     name::String
     date::Date
