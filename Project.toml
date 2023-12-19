@@ -1,0 +1,13 @@
+name = "ResearchMetrics"
+uuid = "749e56f8-d2a1-45e6-af13-39842159e343"
+authors = ["Isaac Elias <isaac.lelias@gmail.com> and contributors"]
+version = "1.0.0-DEV"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
