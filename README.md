@@ -8,7 +8,7 @@ A toolbox to gather and analyse research metrics.
 
 To evaluate the h-index time evolution for a given researcher, first we need to define our researcher by doing:
 
-```julia
+```
 researcher = Researcher("Hommelhoff", # Surname
                         "Universität Erlangen-Nürnberg", # University
                         prizes = [Prize("Gottfried Wilhelm Leibniz Prize", "2022-01-01")]) # Prizes (optional)
@@ -16,7 +16,7 @@ researcher = Researcher("Hommelhoff", # Surname
 
 Now we can use the different information sources to set information on our researcher.
 
-```julia
+```
 setScopusAuthorSearch!(researcher)
 ```
 
@@ -24,7 +24,7 @@ setScopusAuthorSearch!(researcher)
 
 Having these IDs set, we can request another API to provide us the publications under researcher's name. One API that returns this information is Scopus Search.
 
-```julia
+```
 setScopusSearch!(author)
 ```
 
@@ -32,7 +32,7 @@ will include all publications listed in Scopus for that author.
 
 To gather data enough to calculate h-index evolution in time, one should perform
 
-```julia
+```
 setScopusAuthorSearch!(researcher)
 setScopusSearch!(researcher, progress_bar=true)
 mappublications(x -> setScopusAbstractRetrieval!(x), researcher, progress_bar=true)
@@ -42,7 +42,7 @@ mapcitations(x -> setScopusAbstractRetrieval!(x), researcher, progress_bar=true)
 
 After that, lets plot it
 
-```julia
+```
 function plothindexevolution(researcher::Researcher)
     # What to plot
     indication_date = dateof(prizes(researcher)[1])-Year(2)
@@ -81,7 +81,7 @@ The following API's are currently suported.
 
 *NOTE: one must have proper keys to use these API's.* The key can be set with
 
-```julia
+```
 setScopusAPIKey(API_KEY)
 ```
 
