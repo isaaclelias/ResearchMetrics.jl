@@ -24,7 +24,7 @@ setScopusAuthorSearch!(researcher)
 
 Having these IDs set, we can request another API to provide us the publications under researcher's name. One API that returns this information is Scopus Search.
 
-```
+```julia
 setScopusSearch!(author)
 ```
 
@@ -32,7 +32,7 @@ will include all publications listed in Scopus for that author.
 
 To gather data enough to calculate h-index evolution in time, one should perform
 
-```
+```julia
 setScopusAuthorSearch!(researcher)
 setScopusSearch!(researcher, progress_bar=true)
 mappublications(x -> setScopusAbstractRetrieval!(x), researcher, progress_bar=true)
@@ -42,7 +42,7 @@ mapcitations(x -> setScopusAbstractRetrieval!(x), researcher, progress_bar=true)
 
 After that, lets plot it
 
-```
+```julia
 function plothindexevolution(researcher::Researcher)
     # What to plot
     indication_date = dateof(prizes(researcher)[1])-Year(2)
@@ -87,7 +87,7 @@ setScopusAPIKey(API_KEY)
 
 ## Installation
 
-```julia
+```
 pgk> add https://github.com/isaaclelias/ResearchMetrics.jl
 ```
 
