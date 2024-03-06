@@ -30,6 +30,7 @@ function _localquery(query_type::String, query_string::String)::Union{String, No
         return nothing
     end 
 end
+@deprecate localQuery(query_type, query_string) _localquery(query_type, query_string)
 
 function _isqueryknowntofail(query_type::String, query_string::String)::Bool
     fpath = "resources/known-to-fault"

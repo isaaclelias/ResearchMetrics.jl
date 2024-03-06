@@ -19,7 +19,7 @@ end
 function setScopusAuthorSearch!(author::Author; only_local::Bool=false)::Nothing
     @debug "Setting basic information for" author.lastname author.affiliation
     query_string = "AUTHLASTNAME($(lowercase(author.lastname))) and AFFIL($(lowercase(author.affiliation)))"
-    local_query = localQuery(scopusAuthorSearch_fprefix, query_string)
+    local_query = _localquery(scopusAuthorSearch_fprefix, query_string)
     response = ""
     if isnothing(local_query)
         response = _requestScopusAuthorSearch(query_string)
