@@ -50,16 +50,22 @@ function scopussearch(author::Author;
         @debug y
     end
     n_result_total = parse(Int, response_parse["search-results"]["opensearch:totalResults"]) # no need to be done every loop
-    if n_result_total > 240; n_result_total = 240; end # Limiting the amount of abstracts queried REFACTOR THIS ATROCITY
+
+    max_npublication = 800
+    if n_result_total > max_npublication
+        @warn "Author published more than $(max_npublication) publications. Only $(max_npublication) will be retrieved."
+        n_result_total = 240
+    end # Limiting the amount of abstracts queried REFACTOR THIS ATROCITY
+
     start_offsets = 0:scopus_nresultsperpage:n_result_total
-    if progress_bar; start_offsets = ProgressBar(1:n_result_total); end
+    if progress_bar; start_offsets = ProgressBar(1:scopus_nresultsperpage:n_result_total); end
     for start in start_offsets
         response_iter = 0
         try
             response = _requestScopusSearch(query_string, start=start, only_local=only_local, in_a_hurry=in_a_hurry)
             response_parse = JSON.parse(response)
             response_iter = enumerate(response_parse["search-results"]["entry"])
-            @debug response response_parse response_iter
+            #@debug response response_parse response_iter
         catch y
             @debug "aqui" y
             continue
@@ -97,30 +103,33 @@ Use the Scopus Abstract Retrieval API to get data and set the
 
 If a Copus ID is `nothing`, tries to set it based on the article's title.
 """
-function setScopusSearch!(abstract::Abstract; only_local::Bool)::Nothing
-    @debug "Setting basic information from Scopus for" abstract.title abstract.scopus_scopusid
+function setScopusSearch!(abstract::Abstract; only_local::Bool=false)::Nothing
+    @debug "`setScopusSearch` setting basic information from Scopus for" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:
     if isnothing(abstract.scopus_scopusid)
         # Querying scopus
+        title = _formattitleforscopussearch(title)
         title = join(split(lowercase(abstract.title), " "), "+AND+")
         query_string_title = "TITLE("*title*")"
         response = queryScopusSearch(query_string_title, only_local=only_local)
         # Do I have a response?
         if isnothing(response)
-            @warn "Couldn't find scopus_id" abstract.title query_string_title queryID(query_string_title)
+            @warn "Couldn't find scopus_id using title" abstract.title 
+            @debug "`setScopusSearch` failed due to lack of response" query_string_title queryID(query_string_title)
             return nothing
         end
+
         # Parsing the response into the Abstract
         response_parse = JSON.parse(response)
         if haskey(response_parse["search-results"]["entry"][1], "prism:url")
-            @debug "Number of results while trying to set Scopus ID" length(response_parse["search-results"]["entry"])
             scopusid = response_parse["search-results"]["entry"][1]["prism:url"]
             scopusid = replace(scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
             abstract.scopus_scopusid = parse(Int, scopusid)
-            @debug "Scopus ID set succesfully?" abstract.title abstract.scopus_scopusid
+            @debug "`setScopusSearch` Scopus ID set succesfully (?)" abstract.title abstract.scopus_scopusid length(response_parse["search-results"]["entry"])
         else
-            @debug "Couldn't find information on Scopus Search for" abstract.title
+            @warn "Couldn't set Scopus Search information for publication" abstract.title
+            @debug "`setScopusSearch` couldn't find information on Scopus Search for" abstract.title query_string_title queryID(query_string_title)
             return nothing
         end
     end

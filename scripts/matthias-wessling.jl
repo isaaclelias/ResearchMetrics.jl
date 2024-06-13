@@ -10,7 +10,7 @@ using Plots
 using Serialization
 
 # setup logging
-io_path = "logs/christian-hasse"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
+io_path = "logs/matthias-wessling_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*".log"
 touch(io_path)
 io = open(io_path, "w+")
 logger = TeeLogger(ConsoleLogger(stdout, Logging.Info),
@@ -18,7 +18,10 @@ logger = TeeLogger(ConsoleLogger(stdout, Logging.Info),
 global_logger(logger)
 @info "Logging" io_path
 
-hasse = Researcher("hasse", "technische universität darmstadt")
+wessling = Researcher(
+    "wessling",
+    "rwth"
+)
 
 nomination_offset = Year(2)
 
@@ -55,4 +58,5 @@ function plothindexevolution(researcher::Researcher, h_index=nothing)
      #savefig("output/hindex_$(lastname)_$(save_date).png")
 end
 
-
+#setinfoforhindex!(wessling, only_local=true)
+  

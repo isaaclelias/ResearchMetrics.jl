@@ -3,13 +3,18 @@ function _uniqueidentifierSHA(unique_identifier::String)::String
 end
 @deprecate queryID(query_string::String) _uniqueidentifierSHA(query_string)
 
-function _savequery(query_type::String, query_string::String, response::String)::Nothing
+"""
+    _savequery(query_type, query_string, response)
+
+- `query_type`: internal name of the query
+"""
+function _savequery(query_type::AbstractString, query_string::AbstractString, response::AbstractString)::Nothing
     fname = query_type*"_"*Dates.format(now(), "yyyy-mm-dd_HH-MM")*"_"*_uniqueidentifierSHA(query_string)*".json"
     fpath = api_query_folder*fname
     touch(fpath)
     open(fpath, "w") do file
         write(file, response)
-        @debug "Query saved to disk" fpath
+        @debug "Query saved to disk" query_type query_string fpath
     end
     return nothing
 end
@@ -23,10 +28,11 @@ function _localquery(query_type::String, query_string::String)::Union{String, No
         sort!(what_we_have)
         fpath = api_query_folder*what_we_have[1]
         open(fpath, "r") do file
-            @debug "Local query returned file" fpath
+            @debug "Local query returned file" query_type query_string fpath
             return read(file, String)
         end
     else
+        deb_localquerynotfound && @debug "_localquery\nQuery not found locally" query_type query_string
         return nothing
     end 
 end

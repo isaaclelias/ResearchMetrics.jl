@@ -10,7 +10,7 @@ mutable struct Publication
     doi::Union{String, Nothing}
     # Scopus
     scopus_scopusid::Union{Int, Nothing}
-    scopus_authids::Union{Vector{Int}, Nothing}
+    scopus_authids::Union{Vector{String}, Nothing}
     scopus_citation_count::Union{TimeArray, Nothing} # Refactor to citation count
     # Scholar
     scholar_citesid::Union{String, Nothing, Missing}
@@ -70,35 +70,7 @@ function citationdates(abstract::Publication)::Union{Vector{Date}, Nothing}
 end
 @deprecate getCitationDates(article::Publication) citationdates(article)
 
-#=
-function setScopusCitationCount(abstract::Abstract)::Nothing
-    if isnothing(abstract.scopus_citations)
-        @error "No citations set for the given abstract"
-    end
-    
-    citation_dates = Vector{Date}
-    for citation in abstract.citations
-        push!(citation_dates, citation.date)
-    end
-
-    abstract.scopus_citation_count = TimeArray(citation_dates, 1:length(abstract.citations))
-end
-=#
-
-#=
-function _setcitationcount!(abstract::Abstract)
-    citation_dates = getCitationDates(abstract)
-    if !isnothing(citation_dates)
-        onetolength = [i for i=1:length(citation_dates)]
-        abstract.scopus_citation_count = TimeArray(citation_dates, onetolength)
-    else
-        @error "Couldn't set citation dates for" abstract.title
-    end
-end
-@deprecate setCitationCount!(article::Abstract) _setcitationcount!(abstract)
-=#
-
-function citations(article::Publication)
+function citations(article::Publication)::Vector{Publication}
     if !isnothing(article.scopus_citations)
         return article.scopus_citations
     else
@@ -120,6 +92,9 @@ function citationcountat(article::Abstract, date::Date)::Int
     article.scopus_citation_count
 end
 
+"""
+    mapcitations(func, ::Publication)
+"""
 function mapcitations(func, publication::Publication)
     if !isnothing(publication.scopus_citations)
         map(func, publication.scopus_citations)
@@ -127,3 +102,4 @@ function mapcitations(func, publication::Publication)
         return nothing
     end
 end
+

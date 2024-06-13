@@ -99,7 +99,7 @@ function mappublications!(func, destination::Researcher, collection); end
 function mapcitations(func, researcher::Researcher; progress_bar=false)
     destination = []
     progress = ProgressBar(total=totalcitationcount(researcher))
-    Threads.@threads for (i, publication) in collect(enumerate(publications(researcher))) # REFACTOR!!!!!! NOT RACE-CONDITION FREE
+    for (i, publication) in collect(enumerate(publications(researcher))) # REFACTOR!!!!!! NOT RACE-CONDITION FREE
         for (j, citation) in enumerate(citations(publication))
           ProgressBars.update(progress)
           func(researcher.abstracts[i].scopus_citations[j])
@@ -107,5 +107,16 @@ function mapcitations(func, researcher::Researcher; progress_bar=false)
         end
     end
     return destination
+end
+
+function citations(researcher::Researcher)::Vector{Publication}
+    cits = Publication[]
+    for pub in publications(researcher)
+        for cit in citations(pub)
+            push!(cits, cit) 
+        end
+    end
+    unique!(cits)
+    return cits
 end
 

@@ -1,5 +1,7 @@
 [deps]
+CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
+Eyeball = "ce36242b-ad83-4f84-8519-47cd8aeefd60"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LoggingExtras = "e6f89c97-d47a-5376-807f-9c37f3926c36"

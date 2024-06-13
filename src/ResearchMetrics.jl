@@ -16,6 +16,7 @@ using TimeSeries
 using Dates
 using SHA
 using ProgressBars
+using Debugger
 
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
 export hindex
@@ -30,6 +31,7 @@ export setScopusAuthorSearch!
 export setScopusSearch!
 export setScopusApiKey, setScopusSearchData!, getCitationDates
 
+include("logging.jl")
 include("secrets.jl")
 include("Publication.jl")
 include("Prize.jl")
@@ -37,6 +39,9 @@ include("Researcher.jl")
 include("local.jl")
 include("scopus.jl")
 include("serpapi.jl")
+export setSerpapiGScholarSearch!
+
 include("hindex.jl")
+export setinfoforhindex!
 
 end #module

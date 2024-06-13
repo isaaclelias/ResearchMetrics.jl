@@ -6,3 +6,4 @@ output/
 logs/
 hindex_analysis.ipynb
 researchers.jls
+*.jls

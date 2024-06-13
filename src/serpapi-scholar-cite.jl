@@ -1,54 +1,33 @@
 export setSerpapiGScholarCite!
 
 """
-    querySerpapiGScholarCite(::Abstract)
+    querySerpapiGScholarCite(::Abstract, start::Int=0, only_local::Bool=false)
 
-TASKS:
-- Local query
+Fetches list of citations for a given publication using Google Scholar Cite through SerpApi. The query first tries to retrieve the information in the local cache
 """
 function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::Bool=false)::Union{Vector{Abstract}, Nothing}
     # Dealing with lack of information
     ## Nothing
     if isnothing(abstract.scholar_citesid)
-        setBasicFieldsFromSerapiGScholar!(abstract, only_local=true)
+        @debug "`querySerpapiGScholarCite` failing because to Scholar Cite ID is nothing" abstract.title
+        return nothing
     end
-    # Missing
+
+
+    # Fails if Cite ID is missing
     if ismissing(abstract.scholar_citesid)
         @debug "Couldn't query GScholarCite because citesid is missing" abstract.title 
         return nothing
     end
-#=
-    # Tries to set a citesid for the given abstract
-    query_string = abstract.scholar_citesid
-    if isnothing(abstract.scholar_citesid)
-        @debug "No Scholar Cites ID set. Querying for it." abstract.title
-        response = querySerapiGScholar(abstract.title, only_local=only_local)
-        if isnothing(response)
-            @error "Query for citeid returned empty"
-            return nothing
-        end
-        response_parse = JSON.parse(response)
-        if !haskey(response_parse, "organic_results")
-            @error "Scholar response whitout organic_results"
-            return nothing
-        end
-        if haskey(response_parse["organic_results"][1]["inline_links"], "cited_by")
-            abstract.scholar_citesid = response_parse["organic_results"][1]["inline_links"]["cited_by"]["cites_id"]
-            query_string = abstract.scholar_citesid
-            @debug "Citedid set succesfully?" abstract.title abstract.scholar_citesid
-        else
-            @error "Couldn't set citedid" abstract.title abstract.scholar_citesid response_parse["organic_results"][1]["inline_links"]
-            addQueryKnownToFault(serapi_fprefix, abstract.title) #it's added here because faulting is actually having a response without citesid instead of not responding
-            return nothing
-        end
-    end
-=#
 
+    # Prepare the query
     query_string = abstract.scholar_citesid
     endpoint = "https://serpapi.com/search?engine=google_scholar"
     start = -1
     n_response = 1
     n_response_total = 0
+    
+    # Loop through the pages and append the citations
     citations = Vector{Abstract}()
     while true # refactor for a proper for loop intead of this atrocity
         start = start+n_response
@@ -74,17 +53,18 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
             response = HTTP.get(endpoint; query=params).body |> String
             saveQuery(serpapiGScholarCite_fprefix, query_string*"$start", response)
         end
-        # If not remote, give up
+
+        # If not no response, pass to next iteration 
         if isnothing(response)
-            @debug "No response"
+            @debug "`querySerpapiGScholarCite` no response from local or remote sources"
             break
         end
 
         # Parsing and checking the response
         response_parse = JSON.parse(response)
-        if (!haskey(response_parse, "organic_results") ||
-            !haskey(response_parse["organic_results"][1]["inline_links"], "cited_by"))
-            @debug "Received a response, but something wrong" abstract.title start n_response_total queryID(query_string*"$start")
+        if !haskey(response_parse, "organic_results")# ||
+           #!haskey(response_parse["organic_results"][1]["inline_links"], "cited_by"))
+            @debug "`querySerpapiGScholarCite` Received a response with no `organic_results`" abstract.title start n_response_total queryID(query_string*"$start") #!haskey(response_parse, "organic_results") !haskey(response_parse["organic_results"][1]["inline_links"], "cited_by")
             break
         end
 
@@ -92,21 +72,21 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         for item in response_parse["organic_results"]
             citation = Abstract(item["title"])
             push!(citations, citation)
+            @debug "`querySerpapiGScholarCite` found citation found" citation.title
         end
 
         # Preparing to query the next results page
         n_response = length(response_parse["organic_results"])
         n_response_total = response_parse["search_information"]["total_results"]
-        ## If last page
+
+        ## If last page, break. Shoudn't return to the loop after this break
         if start >= n_response_total-10 || n_response == 0 || n_response_total <= 10 || start > 240
             break
         end
     end
+
+    @debug "`querySerpapiGScholarCite` returned" length(citations)
     return citations
-
-    #=
-
-    =#
 end
 
 function setSerpapiGScholarCite!(abstract::Publication; only_local::Bool=false)::Nothing    
@@ -116,7 +96,7 @@ end
 @deprecate setCitations!(abstract::Abstract; only_local::Bool=false) setSerpapiGScholarCite!(abstract, only_local=only_local)
 
 function setSerpapiGScholarCite!(author::Researcher; only_local::Bool=false, progress_bar=false)::Nothing
-    @debug length(author.abstracts)
+    @debug "`setSerpapiGScholarCite!(::Researcher)`" length(author.abstracts)
     for i in 1:length(author.abstracts)
         setSerpapiGScholarCite!(author.abstracts[i], only_local=only_local)
     end
