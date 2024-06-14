@@ -109,8 +109,9 @@ function setScopusSearch!(abstract::Abstract; only_local::Bool=false)::Nothing
     # Does it have a scopusid set? If not:
     if isnothing(abstract.scopus_scopusid)
         # Querying scopus
+        title = abstract.title
         title = _formattitleforscopussearch(title)
-        title = join(split(lowercase(abstract.title), " "), "+AND+")
+        title = join(split(lowercase(title), " "), "+AND+")
         query_string_title = "TITLE("*title*")"
         response = queryScopusSearch(query_string_title, only_local=only_local)
         # Do I have a response?
