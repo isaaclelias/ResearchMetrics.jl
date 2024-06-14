@@ -107,3 +107,58 @@ function setinfoforhindex!(researcher::Researcher; only_local=false, progress_ba
         mapcitations(x -> setScopusAbstractRetrieval!(x, only_local=only_local), researcher, progress_bar=progress_bar)
     end
 end
+
+function scalecurvefinalvalue(timearray, finalvalue::Real)
+    y_end = values(timearray[end])[begin]
+    y_scaled = (values(timearray)/y_end)*finalvalue
+    x = timestamp(timearray)
+    timearray_scaled = TimeArray(x, y_scaled)
+
+    return timearray_scaled
+end
+
+function plothindexevolution(researcher::Researcher; h_index=nothing, scale_final_hindex_to=nothing, indication_offset=Year(2), disconsider_before=nothing)
+
+    # Calculate hindex if not given in function arguments
+    if isnothing(h_index)
+        h_index = hindex(researcher)
+    end
+
+    # Scale the values if the argument for it is given.
+    # The result is that the entire curve is scaled, so the final h_index corresponds to the given one
+    if scale_final_hindex_to |> !isnothing
+        h_index = scalecurvefinalvalue(h_index, scale_final_hindex_to)
+    end
+
+    # Chop out papers before a given date
+    if disconsider_before |> !isnothing
+        h_index = from(h_index, disconsider_before)
+    end
+
+    ## Prizes
+    if prizes(researcher) |> !isnothing
+        
+    end
+
+    indication_date = dateof(prizes(researcher)[1])-indication_offset
+    fit_start_date = first(findwhen(h_index[:A] .> 5))
+    h_index_before = h_index |> (y -> from(y, fit_start_date)) |> (y->to(y, indication_date))
+    h_index_after = from(h_index, indication_date)
+    x_h_index_before = float(Dates.value.(timestamp(h_index_before)))
+    x_h_index_after = float(Dates.value.(timestamp(h_index_after)))
+    y_h_index_before = float(values(h_index_before))
+    y_h_index_after = float(values(h_index_after))
+    fit_h_index_before = curve_fit(LinearFit, x_h_index_before, y_h_index_before)
+    fit_h_index_after = curve_fit(LinearFit, x_h_index_after, y_h_index_after)
+    #lastname = uppercasen(wessling.lastname, 1)
+    save_date = Dates.format(now(), "YYYY-mm-dd_HH-MM")
+    # Plots
+    plt = plot(h_index, linetype=:steppre, label="h-index", title = "Wessling's H-Index evolution")
+    vline!(plt, [dateof(prizes(researcher)[1])-indication_offset], linestyle=:dash, label = "Indication for Gottfried Wilhelm Leibniz Prize")
+    plot!(plt, x_h_index_before, fit_h_index_before.(x_h_index_before), label="Linear fit before indication")
+    plot!(plt, x_h_index_after, fit_h_index_after.(x_h_index_after), label="Linear fit after indication")
+    #savefig("output/hindex_$(lastname)_$(save_date).png")
+
+    return plt
+end
+
