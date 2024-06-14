@@ -117,7 +117,7 @@ function scalecurvefinalvalue(timearray, finalvalue::Real)
     return timearray_scaled
 end
 
-function plothindexevolution(researcher::Researcher; h_index=nothing, scale_final_hindex_to=nothing, indication_offset=Year(2), disconsider_before=nothing)
+function plothindexevolution(researcher::Researcher; h_index=nothing, scale_final_hindex_to=nothing, indication_offset=Year(2), disconsider_before=nothing, fit_curves_when_hindex_is_higher_than=5)
 
     # Calculate hindex if not given in function arguments
     if isnothing(h_index)
@@ -141,7 +141,7 @@ function plothindexevolution(researcher::Researcher; h_index=nothing, scale_fina
     end
 
     indication_date = dateof(prizes(researcher)[1])-indication_offset
-    fit_start_date = first(findwhen(h_index[:A] .> 5))
+    fit_start_date = first(findwhen(h_index[:A] .> fit_curves_when_hindex_is_higher_than))
     h_index_before = h_index |> (y -> from(y, fit_start_date)) |> (y->to(y, indication_date))
     h_index_after = from(h_index, indication_date)
     x_h_index_before = float(Dates.value.(timestamp(h_index_before)))
