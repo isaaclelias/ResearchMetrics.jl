@@ -160,8 +160,8 @@ function plothindexevolution(researcher::Researcher; h_index=nothing, scale_fina
 
     plt_ann = plot(grid=false, axiscolor=:white, fg_color_text=:white, showaxis=false, size=(40,10))
     annotate!(plt_ann, [(0/3, 2/2, ("Scopus H-Index: $(scale_final_hindex_to)", 8, :left))])
-    annotate!(plt_ann, [(0/3, 1/2, ("Before indication: increase of $(trunc(fit_h_index_before.coefs[2]*365, digits=2)) per year.", 8, :left))])
-    annotate!(plt_ann, [(0/3, 0/2, ("After indication: increase of $(trunc(fit_h_index_after.coefs[2]*365, digits=2)) per year.", 8, :left))])
+    annotate!(plt_ann, [(0/3, 1/2, ("Before indication: increase of $(trunc(fit_h_index_before.coefs[2]*365, digits=1)) per year.", 8, :left))])
+    annotate!(plt_ann, [(0/3, 0/2, ("After indication: increase of $(trunc(fit_h_index_after.coefs[2]*365, digits=1)) per year.", 8, :left))])
     annotate!(plt_ann, [(0/3, 1/2, ("", 8, :left))])
 
     @info "used information" x_h_index_before y_h_index_before
