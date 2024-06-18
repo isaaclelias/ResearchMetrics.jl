@@ -137,6 +137,7 @@ function scalecurvefinalvalue(timearray, finalvalue::Real)
     return timearray_scaled
 end
 
+#=
 function plothindexevolution(researcher::Researcher; h_index=nothing, scale_final_hindex_to=nothing, indication_offset=Year(2), disconsider_before=nothing, fit_curves_when_hindex_is_higher_than=5)
 
     # Calculate hindex if not given in function arguments
@@ -191,4 +192,4 @@ function plothindexevolution(researcher::Researcher; h_index=nothing, scale_fina
 
     return plt
 end
-
+=#
