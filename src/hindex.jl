@@ -114,6 +114,15 @@ function setinfoforhindex!(researcher::Researcher; only_local=false, progress_ba
     end
 
     begin
+        @info "Retrieving ScopusID for each citing document"
+        mapcitations(
+            x->setScopusSearch!(x, only_local=only_local),
+            researcher,
+            progress_bar=progress_bar
+        )
+    end
+
+    begin
         progress_bar && @info "Retrieving information for each citation using Scopus Abstract Retrieval"
         mapcitations(x -> setScopusAbstractRetrieval!(x, only_local=only_local), researcher, progress_bar=progress_bar)
     end
