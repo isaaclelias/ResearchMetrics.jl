@@ -1,6 +1,7 @@
 authors = ["Isaac Lucarelli Elias <isaac.lelias@gmail.com>"]
 name = "ResearchMetrics"
 version = "0.0.1"
+uuid = "86df5652-dae2-46dd-bbbb-dee22a34f0fd"
 
 [deps]
 CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
