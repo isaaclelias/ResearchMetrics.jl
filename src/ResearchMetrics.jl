@@ -16,9 +16,7 @@ using TimeSeries
 using Dates
 using SHA
 using ProgressBars
-using Debugger
 using CurveFit
-using Plots
 
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
 export Publication
