@@ -52,6 +52,17 @@ end
 
 """
     setinfoforhindex!(::Researcher, only_local=false, progress_bar=true)
+
+    Fetches information for researcher's publications and publications that cite the researcher's documents aiming to fullfil the information needed for a H-Index evolution in time plot.
+
+    Steps:
+    1. Scopus Author Search performed with the researcher's name and affiliation. Obtain Scopus AuthID and AffiliationID.
+    2. Scopus Search performed with the researcher's AuthID. Obtain ScopusIDs for each of the researcher's publications.
+    3. Scopus Abstract Retrieval performed with each of the researcher's publication's ScopusID. Obtain publication date.
+    4. SerpApi Google Scholar Search performed with each of the researcher's publication's title. Obtain Google Scholar CiteID.
+    5. SerpApi Google Scholar Cite performed with each of the researcher's publication's CiteID. Obtain a list of titles for each of the researcher's publications of the documents that cite each publication.
+    6. Scopus Search performed with each citing documents' title. Obtain a ScopusID for each citing document.
+    7. Scopus Abstract Retrieval performed with each citing document's ScopusID. Obtain publication date for each.
 """
 function setinfoforhindex!(researcher::Researcher; only_local=false, progress_bar=true)
 
