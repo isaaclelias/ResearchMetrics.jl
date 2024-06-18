@@ -19,7 +19,6 @@ using ProgressBars
 using CurveFit
 
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
-export Publication
 export setBasicInfo!, setCitations!, setCitationsBasicInfo!
 export Researcher
 export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
@@ -29,8 +28,12 @@ export setScopusSearch!
 export setScopusApiKey, setScopusSearchData!, getCitationDates
 
 include("logging.jl")
-include("secrets.jl")
+
+include("ApiKeys.jl")
+export setScopusKey, setSerpApiKey
+
 include("Publication.jl")
+export Publication
 
 include("Prize.jl")
 export Prize, dateof, nameof
