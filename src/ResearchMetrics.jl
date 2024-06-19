@@ -11,15 +11,6 @@ using SHA
 using ProgressBars
 using CurveFit
 
-export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
-export setBasicInfo!, setCitations!, setCitationsBasicInfo!
-export Researcher
-export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
-export setScopusAbstractRetrieval!
-export setScopusAuthorSearch!
-export setScopusSearch!
-export setScopusApiKey, setScopusSearchData!, getCitationDates
-
 include("logging.jl")
 
 include("ApiKeys.jl")
@@ -32,12 +23,26 @@ include("Prize.jl")
 export Prize, dateof, nameof
 
 include("Researcher.jl")
+export Researcher
+export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
+
 include("local.jl")
+
 include("scopus.jl")
+export setScopusAbstractRetrieval!
+export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
+
 include("serpapi.jl")
 export setSerpapiGScholarSearch!
+export setScopusSearch!
+export setScopusAuthorSearch!
+export setScopusSearchData!, getCitationDates
+export setBasicInfo!, setCitations!, setCitationsBasicInfo!
 
 include("hindex.jl")
 export hindex, setinfoforhindex!, plothindexevolution
+
+# misc
+export arein
 
 end #module
