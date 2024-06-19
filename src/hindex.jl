@@ -193,3 +193,36 @@ function plothindexevolution(researcher::Researcher; h_index=nothing, scale_fina
     return plt
 end
 =#
+function arein(a::T, b::T) where T<:AbstractVector
+    a = unique(a)
+    b = unique(b)
+
+    # counting principle
+    if length(a) > length(b)
+        return false
+    end
+
+    b_contains_all_a = true
+    # compare each item from a::Vector{} ...
+    for item_a in a
+        b_contains_item_a = false
+        # with every item from b::Vector
+        for item_b in b
+            if item_b == item_a
+                b_contains_item_a = true
+                break
+            end
+        end
+        
+        if b_contains_item_a == false
+            b_contains_all_a = false
+            break
+        end
+    end
+
+    return b_contains_all_a
+end
+
+#setpublications!(researcher)
+
+#setcitations!(researcher::)
