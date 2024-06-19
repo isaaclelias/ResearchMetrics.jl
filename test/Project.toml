@@ -1,4 +1,6 @@
-name = "Test"
-uuid = "2a933f79-bbd4-4a5a-9699-23fa9e16aaf7"
 authors = ["Isaac Elias <isaac.lelias@gmail.com>"]
-version = "0.1.0"
+uuid = "bb21ab01-a43d-4c31-9663-94c7ba9dba94"
+
+[deps]
+ResearchMetrics = "86df5652-dae2-46dd-bbbb-dee22a34f0fd"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
