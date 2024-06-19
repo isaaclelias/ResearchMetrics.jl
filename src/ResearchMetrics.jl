@@ -1,12 +1,5 @@
 """
-Provides functions to bulk query scientific database for authors and analyse their h-indexes.
-
-Issues:
-- Scopus API only allows 2 requests/second. This will take forever.
-
-Tasks:
-- Get data from output/extern before querying scopus
-- Write LOTS of documentation
+Provides functions to bulk query scientific databases for authors and publications information and analyse their h-indexes.
 """
 module ResearchMetrics
 
