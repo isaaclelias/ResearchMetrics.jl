@@ -33,8 +33,7 @@ authors = [
     #Author("haddadin", "technische universität münchen") # Survey 5
     #Author("wessling", "rwth") # Survey 6
     #Author("schölkopf", "mpi") # Survey 7
-    #Author("mädler", "universität bremen") # Survey 8
-    #Author("grimme", "universität bonn") # Survey 9
+    #Author("mädler", "universität bremen") # Survey     #Author("grimme", "universität bonn") # Survey 9
     #Author("dreizler", "technische universität darmstadt") # Survey 9
     #Author("merklein", "universität erlangen-nürnberg") # Survey 8
     #Author("rosch", "universität zu köln") # Survey 7
@@ -67,3 +66,5 @@ end
 for author in authors
     print(author.scopus_hindex)
 end
+
+

@@ -15,8 +15,8 @@ mutable struct Researcher
     affiliation::Union{String, Nothing}
     abstracts::Union{Vector{Publication}, Nothing} # refactor to publications, refactor to only Vector{publications}
     prizes::Union{Vector{Prize}, Nothing}
+
     # Scopus
-    ## Basic info
     scopus_authid::Union{Int, Nothing}
     scopus_affiliation_id::Union{String, Nothing}
     scopus_firstname::Union{String, Nothing}
@@ -24,9 +24,14 @@ mutable struct Researcher
     scopus_affiliation::Union{String, Nothing}
     scopus_query_nresults::Union{String, Nothing}
     scopus_query_string::Union{String, Nothing}
-    ## Authored
+
     # ORCID
     orcid_id::Union{String, Nothing}
+
+    # Google Scholar
+    gscholar_name
+    gscholar_affiliations::Union{Vector{String}, Nothing}
+    gscholar_author_id::Union{String, Nothing, Missing}
 
     # Enforce that `Author` has at least these two fields filled up
     function Researcher(lastname::String, affiliation::String; prizes=nothing)

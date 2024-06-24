@@ -64,7 +64,7 @@ end
     6. Scopus Search performed with each citing documents' title. Obtain a ScopusID for each citing document.
     7. Scopus Abstract Retrieval performed with each citing document's ScopusID. Obtain publication date for each.
 """
-function setinfoforhindex!(researcher::Researcher; only_local=false, progress_bar=true)
+function _setinfoforhindex_scopus_serpapi!(researcher::Researcher; only_local=false, progress_bar=true)
 
     begin
         @info "Retrieving author's data with Scopus Author Search\nRetrieving publications title and Scopus ID"
@@ -127,6 +127,7 @@ function setinfoforhindex!(researcher::Researcher; only_local=false, progress_ba
         mapcitations(x -> setScopusAbstractRetrieval!(x, only_local=only_local), researcher, progress_bar=progress_bar)
     end
 end
+@deprecate setinfoforhindex!(researcher::Researcher, only_local::Bool=false, progress_bar::Bool=true) _setinfoforhindex_scopus_serpapi(researcher, only_local, progress_bar)
 
 function scalecurvefinalvalue(timearray, finalvalue::Real)
     y_end = values(timearray[end])[begin]
@@ -193,6 +194,28 @@ function plothindexevolution(researcher::Researcher; h_index=nothing, scale_fina
     return plt
 end
 =#
+
+function setpublications!(
+    researcher::Researcher,
+    keys::Union{Vector{Symbol}, Symbol};
+
+    verbose=false,
+    ask_before_batch=true,
+    warn_not_found_information=true
+)
+
+    error("Non implemented")
+    error("Non tested")
+
+    if typeof(keys) == Symbol
+        keys = Symbol[keys]
+    end
+    
+    if [:Scopus, :SerpApi] |> arein(keys)
+        
+    end
+end
+
 function arein(a::T, b::T) where T<:AbstractVector
     a = unique(a)
     b = unique(b)
