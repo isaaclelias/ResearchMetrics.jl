@@ -10,37 +10,44 @@ using Dates
 using SHA
 using ProgressBars
 using CurveFit
+using DataFrames
 
 include("logging.jl")
 
-include("ApiKeys.jl")
+include("APIs/ApiKeys.jl")
 export setScopusKey, setSerpApiKey
 
-include("Publication.jl")
-export Publication
+include("data-structures/Publication.jl")
+export Publication, title
 
-include("Prize.jl")
+include("data-structures/Prize.jl")
 export Prize, dateof, nameof
 
-include("Researcher.jl")
+include("data-structures/Researcher.jl")
 export Researcher
 export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
 
 include("local.jl")
+export setworkingdir
 
-include("scopus.jl")
-export setScopusAbstractRetrieval!
+include("APIs/scopus.jl")
+export set_scopus_abstract_retrieval!, set_scopus_search!, set_scopus_author_search!
 export setScopusData!, getScopusAuthoredAbstracts, getAuthorsFromCSV, getCitations, popSelfCitations!, getScopusCitingAbstracts, queryID
 
-include("serpapi.jl")
+# TODO refactor the names to the commom standard
+include("APIs/serpapi.jl")
 export setSerpapiGScholarSearch!
 export setScopusSearch!
 export setScopusAuthorSearch!
 export setScopusSearchData!, getCitationDates
 export setBasicInfo!, setCitations!, setCitationsBasicInfo!
+export setSerpapiGScholarCite!
 
 include("hindex.jl")
 export hindex, setinfoforhindex!, plothindexevolution
+
+include("workflows/hindex_scopus_serpapi.jl")
+export set_needed_for_hindex_with_scopus_serpapi!
 
 # misc
 export arein

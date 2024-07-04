@@ -1,3 +1,6 @@
+working_dir = nothing
+api_query_folder = "resources/extern/"
+
 function _uniqueidentifierSHA(unique_identifier::String)::String
     query_sha = first(bytes2hex(sha256(unique_identifier)), sha_length)
 end
@@ -63,4 +66,6 @@ function addQueryKnownToFault(query_type::String, query_string::String)::Nothing
     return nothing
 end
 
-
+function setworkingdir(path::AbstractString)
+    global working_dir = path
+end

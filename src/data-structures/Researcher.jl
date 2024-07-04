@@ -10,6 +10,7 @@ Tasks:
 """
 mutable struct Researcher
     # Basic info
+    # TODO refactor to `user_` to indicate that they where supplied by the user
     firstname::Union{String, Nothing}
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
@@ -24,14 +25,20 @@ mutable struct Researcher
     scopus_affiliation::Union{String, Nothing}
     scopus_query_nresults::Union{String, Nothing}
     scopus_query_string::Union{String, Nothing}
+    success_set_scopus_author_search::Union{Bool, Nothing}
+    success_set_scopus_search::Union{Bool, Nothing}
 
     # ORCID
     orcid_id::Union{String, Nothing}
 
     # Google Scholar
-    gscholar_name
-    gscholar_affiliations::Union{Vector{String}, Nothing}
+    gscholar_name::Union{String, Nothing}
+    gscholar_affiliations::Union{String, Nothing}
     gscholar_author_id::Union{String, Nothing, Missing}
+    success_set_serpapi_google_scholar_author::Union{Bool, Nothing}
+    success_set_serpapi_google_scholar_cited_by::Union{Bool, Nothing}
+    success_set_serpapi_google_scholar_profiles::Union{Bool, Nothing}
+    
 
     # Enforce that `Author` has at least these two fields filled up
     function Researcher(lastname::String, affiliation::String; prizes=nothing)
@@ -124,4 +131,66 @@ function citations(researcher::Researcher)::Vector{Publication}
     unique!(cits)
     return cits
 end
+
+function DataFrame(res::Researcher)
+    # what do I need to know to evaluate why there's missing data for the hindex?
+
+    pub_title = []
+    pub_date = []
+    pub_link = []
+    pub_scopus_id = []
+    pub_scopus_authids = []
+    cit_title = []
+    cit_date = []
+    cit_gscholar_authids = []
+    pub_success_set_scopus_abstract_retrieval = []
+    pub_success_set_serpapi_google_scholar_search = []
+    pub_success_set_serpapi_google_scholar_cite = []
+    cit_success_set_scopus_search = []
+    cit_success_set_scopus_abstract_retrieval = []
+
+    for pub in publications(res)
+        for cit in citations(pub)
+            append!(pub_title, title(pub))
+            append!(pub_date, date(pub))
+            append!(pub_scopus_id,
+                    pub.scopus_scopusid)
+            append!(
+                pub_scopus_authids,
+                _parse_authids_to_string(pub.scopus_authids)
+            )
+            append!(pub_link, link(pub))
+            append!(pub_success_set_scopus_abstract_retrieval,
+                    _parse_success_to_string(pub.success_set_scopus_abstract_retrieval))
+            append!(pub_success_set_serpapi_google_scholar_search,
+                    _parse_success_to_string(pub.success_set_serpapi_google_scholar_search))
+            append!(pub_success_set_serpapi_google_scholar_cite,
+                    _parse_success_to_string(pub.success_set_serpapi_google_scholar_cite))
+            append!(cit_title, title(cit))
+            append!(cit_date, date(cit))
+            append!(cit_gscholar_authids, cit.gscholar_authids)
+            append!(cit_success_set_scopus_search, 
+                    cit.success_set_scopus_search)
+            append!(cit_success_set_scopus_abstract_retrieval,
+                    cit.success_set_scopus_abstract_retrieval)
+        end
+    end
+
+    df = DataFrame(
+        "PublicationTitle" => pub_title,
+        "PublicationDate" => pub_date,
+        "PublicationLink" => pub_link,
+        "PublicationScopusId" => pub_scopusid,
+        "PublicationScopusAuthorIds" => pub_authids,
+        "CitationTitle" => cit_title,
+        "CitationDate" => cit_date,
+        "PublicantionSuccededScopusAbstractRetrieval" => pub_success_set_scopus_abstract_retrieval,
+        "PublicationSuccededSerpapiGoogleScholarSearch" => pub_success_set_serpapi_google_scholar_search,
+        "PublicationSuccededSerpapiGoogleScholarCite" => pub_success_set_serpapi_google_scholar_cite,
+        "CitationSuccededGoogleScholarAuthorIds" => cit_gscholar_authids,
+        "CitationSuccededScopusSearch" => cit_success_set_scopus_search,
+        "CitationSuccededScopusAbstractRetrieval" => cit_success_set_scopus_abstract_retrieval
+    )
+end
+
 

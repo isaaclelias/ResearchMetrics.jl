@@ -56,14 +56,16 @@ function set_serpapi_google_scholar_search!(publication::Publication; only_local
 
     # Tries to set a Cites ID, otherwise assigns missing to indicate that it was already tried
     try
-        response_parse = JSON.parse(querySerapiGScholar(query_string, only_local=only_local))
-        abstract.scholar_citesid = response_parse["organic_results"][1]["inline_links"]["cited_by"]["cites_id"]
+        response_parse = JSON.parse(response)
+        publication.scholar_citesid = response_parse["organic_results"][1]["inline_links"]["cited_by"]["cites_id"]
+        publication.success_set_serpapi_google_scholar_search = true
+        @debug "`set_serpapi_google_scholar_search!` successful" publication.title publication.scholar_citesid
+        return nothing
     catch y
-        @debug "`setSerpapiGScholarSearch!` coudln't find a Google Scholar Cite ID\nProbably the given publication was not cited yet." abstract.title
-        abstract.scholar_citesid = missing
+        @debug "`set_serpapi_google_scholar_search!` coudln't find a Google Scholar Cite ID." publication.title y
+        return nothing
     end
-    @debug "Result from setBasicFieldsFromSerapiGScholar" abstract.title abstract.scholar_citesid
-    return nothing
-end
-@deprecate setSerpapiGScholarSearch!(abstract; only_local=false) setBasicFieldsFromSerapiGScholar!(abstract, only_local=only_local)
 
+    error("I shoudn't exit here. File an issue please.")
+end
+# TODO resolve @deprecate for set_serpapi_google_scholar_search!
