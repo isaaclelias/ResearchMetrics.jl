@@ -42,9 +42,18 @@ end
 Basic fields:
 - scholar_citesid
 """
-function setBasicFieldsFromSerapiGScholar!(abstract::Abstract; only_local::Bool=false)::Nothing
-    @debug "`setSerpapiGScholarSearch`" abstract.title
-    query_string = abstract.title
+function set_serpapi_google_scholar_search!(publication::Publication; only_local::Bool=false)::Nothing
+    publication.success_set_serpapi_google_scholar_search = false
+    
+    @debug "`set_serpapi_google_scholar_search!`"
+    query_string = publication.title # TODO refactor to title(p)
+
+    response = querySerapiGScholar(query_string, only_local=only_local) # TODO refactor
+    if isnothing(response)
+        @warn "`set_serpapi_google_scholar_search!` Couldn't set SerpApi Google Scholar Search" title(publication)
+        return nothing
+    end
+
     # Tries to set a Cites ID, otherwise assigns missing to indicate that it was already tried
     try
         response_parse = JSON.parse(querySerapiGScholar(query_string, only_local=only_local))

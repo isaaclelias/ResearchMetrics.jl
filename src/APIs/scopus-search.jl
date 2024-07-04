@@ -36,6 +36,7 @@ function scopussearch(author::Author;
                       only_local=false,
                       progress_bar::Bool=false,
                       in_a_hurry=false)::Vector{Publication}
+    author.success_set_scopus_search = false
     query_string = "AU-ID($(author.scopus_authid))"
     start = 0
     authored_abstracts = Vector{Abstract}()
@@ -103,6 +104,7 @@ Use the Scopus Abstract Retrieval API to get data and set the
 If a Copus ID is `nothing`, tries to set it based on the article's title.
 """
 function set_scopus_search!(abstract::Abstract; only_local::Bool=false)::Nothing
+    abstract.success_set_scopus_search = false
     @debug "`setScopusSearch` setting basic information from Scopus for" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:
@@ -126,6 +128,7 @@ function set_scopus_search!(abstract::Abstract; only_local::Bool=false)::Nothing
             scopusid = response_parse["search-results"]["entry"][1]["prism:url"]
             scopusid = replace(scopusid, r"https://api.elsevier.com/content/abstract/scopus_id/"=>"")
             abstract.scopus_scopusid = parse(Int, scopusid)
+            abstract.success_set_scopus_search = true
             @debug "`setScopusSearch` Scopus ID set succesfully (?)" abstract.title abstract.scopus_scopusid length(response_parse["search-results"]["entry"])
         else
             @warn "Couldn't set Scopus Search information for publication" abstract.title

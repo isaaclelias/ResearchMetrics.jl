@@ -24,6 +24,7 @@ function query_serpapi_google_scholar_profiles(query_string::AbstractString)
 end
 
 function set_serpapi_google_scholar_profiles(r::Researcher)
+    r.success_set_serpapi_google_scholar_profiles = false
     
     response = query_serpapi_google_scholar_profiles(
         r.firstname*" "*r.lastname*" "*r.affiliation
@@ -35,5 +36,7 @@ function set_serpapi_google_scholar_profiles(r::Researcher)
     r.gscholar_affiliations = response_parse["profiles"][1]["affiliations"]
     r.gscholar_author_id    = response_parse["profiles"][1]["author_id"]
 
-    @debug "set_serpapi_google_scholar_profiles_api" r.gscholar_name r.gscholar_affiliations r.gscholar_author_id
+    r.success_set_serpapi_google_scholar_profiles = true
+
+    @debug "set_serpapi_google_scholar_profiles" r.gscholar_name r.gscholar_affiliations r.gscholar_author_id
 end

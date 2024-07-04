@@ -33,6 +33,7 @@ end
 Uses the Scopus Abstract Retrieval API to get data. If a Scopus ID is `nothing`, tries to set it based on the article's title.
 """
 function set_scopus_abstract_retrieval!(abstract::Abstract; only_local::Bool=false)::Nothing
+    abstract.success_set_scopus_abstract_retrieval = false
     @debug "`setScopusAbstractRetrieval` setting from Scopus Abstract Retrieval" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:
@@ -67,6 +68,8 @@ function set_scopus_abstract_retrieval!(abstract::Abstract; only_local::Bool=fal
         for auth in response_parse["coredata"]["dc:creator"]["author"]
             push!(abstract.scopus_authids, auth["@auid"])
         end
+
+        abstract.success_set_scopus_abstract_retrieval = true
     catch y
         @debug "setScopusAbstractRetrieval" y
     end

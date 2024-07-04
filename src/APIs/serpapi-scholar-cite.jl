@@ -1,11 +1,10 @@
-export setSerpapiGScholarCite!
-
 """
     querySerpapiGScholarCite(::Abstract, start::Int=0, only_local::Bool=false)
 
 Fetches list of citations for a given publication using Google Scholar Cite through SerpApi. The query first tries to retrieve the information in the local cache
 """
 function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::Bool=false)::Union{Vector{Abstract}, Nothing}
+    abstract.success_set_serpapi_google_scholar_cite = false
     # Dealing with lack of information
     ## Nothing
     if isnothing(abstract.scholar_citesid)
@@ -81,6 +80,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
 
         ## If last page, break. Shoudn't return to the loop after this break
         if start >= n_response_total-10 || n_response == 0 || n_response_total <= 10 || start > 240
+            abstract.success_set_serpapi_google_scholar_cite = true
             break
         end
     end
