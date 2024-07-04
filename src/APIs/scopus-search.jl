@@ -90,11 +90,10 @@ function scopussearch(author::Author;
     return authored_abstracts
 end
 
-function setScopusSearch!(author::Author; only_local::Bool=false, progress_bar=false)::Nothing
+function set_scopus_search!(author::Author; only_local::Bool=false, progress_bar=false)::Nothing
     author.abstracts = scopussearch(author, only_local=only_local, progress_bar=progress_bar)
     return nothing
 end
-@deprecate setAuthoredAbstracts!(author::Author; only_local::Bool=false) setScopusArticles!(author, only_local=only_local)
 
 """
     setscopussearch!(::Publication; only_local::Bool)::Nothing
@@ -103,7 +102,7 @@ Use the Scopus Abstract Retrieval API to get data and set the
 
 If a Copus ID is `nothing`, tries to set it based on the article's title.
 """
-function setScopusSearch!(abstract::Abstract; only_local::Bool=false)::Nothing
+function set_scopus_search!(abstract::Abstract; only_local::Bool=false)::Nothing
     @debug "`setScopusSearch` setting basic information from Scopus for" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:

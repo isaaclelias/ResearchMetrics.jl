@@ -14,7 +14,7 @@ function request_serpapi_google_scholar_profiles_api(query_string::String)
     return response
 end
 
-function query_serpapi_google_scholar_profiles_api(query_string::AbstractString)
+function query_serpapi_google_scholar_profiles(query_string::AbstractString)
     response = _localquery(fprefix_serpapi_google_scholar_profile, query_string)
     if isnothing(response)
         response = request_serpapi_google_scholar_profiles_api(query_string)
@@ -23,8 +23,9 @@ function query_serpapi_google_scholar_profiles_api(query_string::AbstractString)
     @debug "query_serpapi_google_scholar_profiles_api" query_string
 end
 
-function set_serpapi_google_scholar_profiles_api(r::Researcher)
-    response = query_serpapi_google_scholar_profiles_api(
+function set_serpapi_google_scholar_profiles(r::Researcher)
+    
+    response = query_serpapi_google_scholar_profiles(
         r.firstname*" "*r.lastname*" "*r.affiliation
     )
 

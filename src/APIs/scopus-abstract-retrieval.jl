@@ -32,7 +32,7 @@ end
 
 Uses the Scopus Abstract Retrieval API to get data. If a Scopus ID is `nothing`, tries to set it based on the article's title.
 """
-function setScopusAbstractRetrieval!(abstract::Abstract; only_local::Bool=false)::Nothing
+function set_scopus_abstract_retrieval!(abstract::Abstract; only_local::Bool=false)::Nothing
     @debug "`setScopusAbstractRetrieval` setting from Scopus Abstract Retrieval" abstract.title abstract.scopus_scopusid
 
     # Does it have a scopusid set? If not:

@@ -16,7 +16,7 @@ function _requestScopusAuthorSearch(query_string::String)::String
     end
 end
 
-function setScopusAuthorSearch!(author::Author; only_local::Bool=false)::Nothing
+function set_scopus_author_search!(author::Author; only_local::Bool=false)::Nothing
     @debug "`setScopusAuthorSearch`" author.lastname author.affiliation
     query_string = "AUTHLASTNAME($(lowercase(author.lastname))) and AFFIL($(lowercase(author.affiliation)))"
     local_query = _localquery(scopusAuthorSearch_fprefix, query_string)
@@ -44,3 +44,5 @@ function setScopusAuthorSearch!(author::Author; only_local::Bool=false)::Nothing
 
     return nothing
 end
+
+@deprecate setScopusAuthorSearch!(author, only_local=false) set_scopus_author_search(author, only_local=only_local)
