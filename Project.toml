@@ -1,10 +1,11 @@
-authors = ["Isaac Lucarelli Elias <isaac.lelias@gmail.com>"]
 name = "ResearchMetrics"
-version = "0.0.1"
 uuid = "86df5652-dae2-46dd-bbbb-dee22a34f0fd"
+authors = ["Isaac Lucarelli Elias <isaac.lelias@gmail.com>"]
+version = "0.0.1"
 
 [deps]
 CurveFit = "5a033b19-8c74-5913-a970-47c3779ef25c"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Dates = "ade2ca70-3891-5945-98fb-dc099432e06a"
 Eyeball = "ce36242b-ad83-4f84-8519-47cd8aeefd60"
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
