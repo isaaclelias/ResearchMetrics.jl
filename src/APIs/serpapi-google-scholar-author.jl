@@ -1,6 +1,6 @@
-fprefix_serpapi_google_scholar_author = "Serapi-GoogleScholarAuthorArticles"
+fprefix_serpapi_google_scholar_author = "Serapi-GoogleScholarAuthor"
 
-function request_serpapi_google_scholar_author_api(gscholar_author_id::String)
+function request_serpapi_google_scholar_author_api(gscholar_author_id::AbstractString)
     # Preparing API
     endpoint = "https://serpapi.com/search?engine=google_scholar_author"
     params = ["api_key" => serapi_api_key,
