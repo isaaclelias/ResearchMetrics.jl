@@ -35,6 +35,8 @@ mutable struct Researcher
     gscholar_name::Union{String, Nothing}
     gscholar_affiliations::Union{String, Nothing}
     gscholar_author_id::Union{String, Nothing, Missing}
+    gscholar_citation_count::Union{Int, Nothing}
+    gscholar_link::Union{String, Nothing}
     success_set_serpapi_google_scholar_author::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_cited_by::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_profiles::Union{Bool, Nothing}
@@ -43,6 +45,15 @@ mutable struct Researcher
     # Enforce that `Author` has at least these two fields filled up
     function Researcher(lastname::String, affiliation::String; prizes=nothing)
         author = new(ntuple(x->nothing, fieldcount(Author))...)
+        author.lastname = lastname
+        author.affiliation = affiliation
+        author.prizes = prizes
+        return author
+    end
+
+    function Researcher(firstname::AbstractString, lastname::AbstractString, affiliation::AbstractString; prizes=nothing)
+        author = new(ntuple(x->nothing, fieldcount(Author))...)
+        author.firstname = firstname
         author.lastname = lastname
         author.affiliation = affiliation
         author.prizes = prizes
