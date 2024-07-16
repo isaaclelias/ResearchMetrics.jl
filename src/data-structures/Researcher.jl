@@ -143,9 +143,8 @@ function citations(researcher::Researcher)::Vector{Publication}
     return cits
 end
 
-function DataFrame(res::Researcher)
+function dataframe_citations(res::Researcher)
     # what do I need to know to evaluate why there's missing data for the hindex?
-
     pub_title = []
     pub_date = []
     pub_link = []
@@ -161,15 +160,14 @@ function DataFrame(res::Researcher)
     cit_success_set_scopus_abstract_retrieval = []
 
     for pub in publications(res)
+        @show "passei por aqui"
         for cit in citations(pub)
             append!(pub_title, title(pub))
             append!(pub_date, date(pub))
             append!(pub_scopus_id,
                     pub.scopus_scopusid)
-            append!(
-                pub_scopus_authids,
-                _parse_authids_to_string(pub.scopus_authids)
-            )
+            append!(pub_scopus_authids,
+                    _parse_authids_to_string(pub.scopus_authids))
             append!(pub_link, link(pub))
             append!(pub_success_set_scopus_abstract_retrieval,
                     _parse_success_to_string(pub.success_set_scopus_abstract_retrieval))
@@ -184,15 +182,16 @@ function DataFrame(res::Researcher)
                     cit.success_set_scopus_search)
             append!(cit_success_set_scopus_abstract_retrieval,
                     cit.success_set_scopus_abstract_retrieval)
+            @show "passei por aqui também"
         end
     end
 
-    df = DataFrame(
+    df = Dict(
         "PublicationTitle" => pub_title,
         "PublicationDate" => pub_date,
         "PublicationLink" => pub_link,
-        "PublicationScopusId" => pub_scopusid,
-        "PublicationScopusAuthorIds" => pub_authids,
+        "PublicationScopusId" => pub_scopus_id,
+        "PublicationScopusAuthorIds" => pub_scopus_authids,
         "CitationTitle" => cit_title,
         "CitationDate" => cit_date,
         "PublicantionSuccededScopusAbstractRetrieval" => pub_success_set_scopus_abstract_retrieval,
@@ -202,6 +201,42 @@ function DataFrame(res::Researcher)
         "CitationSuccededScopusSearch" => cit_success_set_scopus_search,
         "CitationSuccededScopusAbstractRetrieval" => cit_success_set_scopus_abstract_retrieval
     )
+
+    return df
 end
 
+function dataframe_publications(res::Researcher)
+    # what do I need to know to evaluate why there's missing data for the hindex?
+    pub_title = []
+    pub_date = []
+    pub_link = []
 
+    for pub in publications(res)
+        @show "passei por aqui"
+        push!(pub_title, title(pub))
+        push!(pub_date, date(pub))
+        push!(pub_link, link(pub))
+    end
+
+    df = Dict(
+        "PublicationTitle" => pub_title,
+        "PublicationDate" => pub_date,
+        "PublicationLink" => pub_link,
+    )# |> x->DataFrame(x)
+
+    return df
+end
+
+function name(r::Researcher)
+    if  !any(isnothing.([r.scopus_firstname, r.scopus_lastname]))
+        return r.scopus_firstname*" "*r.scopus_lastname
+    elseif !isnothing(r.gscholar_name);
+        return r.gscholar_name
+    elseif !any(isnothing.([r.firstname, r.lastname]))
+        return r.firstname*" "*r.lastname
+    elseif isnothing(r.lastname)
+        return r.lastname
+    else
+        throw(UndefRefError())
+    end
+end
