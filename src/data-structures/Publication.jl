@@ -110,8 +110,8 @@ function citationdates(abstract::Publication)::Union{Vector{Date}, Nothing}
     end
 
     for citation in abstract.scopus_citations
-        if !isnothing(citation.date_pub)
-            push!(citation_dates, citation.date_pub)
+        if !isnothing(date(citation))# && !ismissing(date(citation))
+            push!(citation_dates, date(citation))
         end
     end
     sort!(citation_dates)

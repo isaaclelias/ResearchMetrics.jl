@@ -8,7 +8,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     # Dealing with lack of information
     ## Nothing
     if isnothing(abstract.scholar_citesid)
-        @debug "`querySerpapiGScholarCite` failing because to Scholar Cite ID is nothing" abstract.title
+        @debug "`querySerpapiGScholarCite` failing because to Scholar Cite ID is nothing" title(abstract)
         return nothing
     end
 
@@ -35,7 +35,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         end
 
         # API Request
-        @debug "Querying Google Scholar for citations" abstract.title abstract.scholar_citesid start
+        @debug "Querying Google Scholar for citations" title(abstract) abstract.scholar_citesid start
         response = nothing
         ## Trying locally
         local_query = localQuery(serpapiGScholarCite_fprefix, query_string*"$start")
