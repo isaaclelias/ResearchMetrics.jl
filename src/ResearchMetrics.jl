@@ -43,6 +43,9 @@ export setScopusSearchData!, getCitationDates
 export setBasicInfo!, setCitations!, setCitationsBasicInfo!
 export setSerpapiGScholarCite!
 
+include("APIs/serpapi-scholar-cite.jl")
+export set_serpapi_google_scholar_cite!
+
 include("APIs/serpapi-google-scholar-profiles.jl")
 export set_serpapi_google_scholar_profiles!
 

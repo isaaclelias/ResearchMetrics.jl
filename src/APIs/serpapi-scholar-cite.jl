@@ -70,6 +70,21 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
         # Apending the returned citations
         for item in response_parse["organic_results"]
             citation = Abstract(item["title"])
+            citation.gscholar_date = begin
+                if haskey(item, "publication_info") && haskey(item["publication_info"], "summary")
+                    @show item["publication_info"]["summary"]
+                    _parse_gscholar_summary_to_date(item["publication_info"]["summary"])
+                else
+                    missing
+                end
+            end
+            citation.gscholar_pub_link = begin
+                if haskey(item, "link")
+                    item["link"]
+                else
+                    missing
+                end
+            end
             push!(citations, citation)
             @debug "`querySerpapiGScholarCite` found citation found" citation.title
         end
@@ -89,18 +104,26 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     return citations
 end
 
-function setSerpapiGScholarCite!(abstract::Publication; only_local::Bool=false)::Nothing    
+function _parse_gscholar_summary_to_date(s::AbstractString)
+    r = r"[1-2][0-9]{3}"
+    dat = match(r, s).match
+    return Date(dat)
+end
+
+function set_serpapi_google_scholar_cite!(abstract::Publication; only_local::Bool=false)::Nothing    
     abstract.scopus_citations = querySerapiGScholarCite(abstract, only_local=only_local)
     return nothing
 end
 @deprecate setCitations!(abstract::Abstract; only_local::Bool=false) setSerpapiGScholarCite!(abstract, only_local=only_local)
+@deprecate setSerpapiGScholarCite!(a::Abstract; only_local::Bool=false) set_serpapi_google_scholar_cite!(a, only_local=only_local)
 
-function setSerpapiGScholarCite!(author::Researcher; only_local::Bool=false, progress_bar=false)::Nothing
+function set_serpapi_google_scholar_cite!(author::Researcher; only_local::Bool=false, progress_bar=false)::Nothing
     @debug "`setSerpapiGScholarCite!(::Researcher)`" length(author.abstracts)
     for i in 1:length(author.abstracts)
         setSerpapiGScholarCite!(author.abstracts[i], only_local=only_local)
     end
     return nothing
 end
-@deprecate setCitations!(author::Author; only_local::Bool=false) setCitationsWithSerpapiGScholarCite!(author, only_local=only_local)
+@deprecate setSerpapiGScholarCite!(a::Researcher; only_local::Bool=false) set_serpapi_google_scholar_cite!(a, only_local=only_local)
+@deprecate setCitations!(author::Author; only_local::Bool=false, progress_bar::Bool=false) setCitationsWithSerpapiGScholarCite!(author, only_local=only_local, progress_bar=progress_bar)
 

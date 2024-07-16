@@ -20,12 +20,14 @@ mutable struct Publication
 
     # Scholar
     gscholar_title::Union{String, Nothing}
-    gscholar_date::Union{Date, Nothing}
+    gscholar_authors::Union{String, Nothing, Missing}
+    gscholar_date::Union{Date, Nothing, Missing}
     gscholar_authids::Union{Vector{String}, Nothing}
     gscholar_citation_count::Union{Int, Nothing}
-    gscholar_link::Union{String, Nothing}
+    gscholar_database_link::Union{String, Nothing}
+    gscholar_pub_link::Union{String, Nothing, Missing}
     #gscholar_link_domain::Union{String, Nothing} # like link.springer.com
-    scholar_citesid::Union{String, Nothing} # TODO refactor to `gscholar`
+    scholar_citesid::Union{String, Nothing, Missing} # TODO refactor to `gscholar`
     success_set_serpapi_google_scholar_search::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_cite::Union{Bool, Nothing}
 
