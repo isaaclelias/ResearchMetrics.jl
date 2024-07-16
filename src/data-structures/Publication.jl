@@ -89,7 +89,16 @@ function title(p::Publication)::Union{String, Nothing}
 end
 
 function date(p::Publication)
-    
+    # this was code golf
+    if (pd=p.scopus_date) |> x->!any([isnothing(x), ismissing(x)]);         return pd
+    # this is what it means
+    elseif !isnothing(p.gscholar_date) && !ismissing(p.gscholar_date);      return p.gscholar_date
+    elseif !isnothing(p.date_pub) && !ismissing(p.date_pub);              return p.date_pub
+    else
+        if any(ismissing.([p.scopus_date, p.gscholar_date, p.date_pub])); return missing
+        else;                                                             return nothing
+        end
+    end
 end
 
 function link(p::Publication)
