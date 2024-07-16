@@ -27,9 +27,9 @@ end
 
 function set_serpapi_google_scholar_author!(r::Researcher)
     r.success_set_serpapi_google_scholar_author = false
+    r.abstracts = Publication[]
 
     start = 0
-    publications = Publication[]
     while !isnothing(start) # no, God, please no
         # get a response from somewhere
         response_parse = nothing  
@@ -47,37 +47,53 @@ function set_serpapi_google_scholar_author!(r::Researcher)
                     x->match(r"=([0-9]*)$", x).captures[1] |>
                     x->parse(Int, x)
         catch y
-            @debug "set_serpapi_google_scholar_author!() reached the last page of results" name(r) start response_parse
+            @debug "set_serpapi_google_scholar_author!() reached the last page of results" name(r) start
             start = nothing
         end
 
         # use the response to set the fields
         try
             for article in response_parse["articles"]
-                # should fail if not present
                 pub = Publication()
                 pub.gscholar_title = article["title"]
-                pub.gscholar_link = article["link"]
+                pub.gscholar_database_link = article["link"]
+
                 pub.gscholar_date = begin 
                     if length(article["year"]) > 0
-                        return Date(article["year"])
+                        Date(article["year"])
                     else
-                        return missing
+                        missing
                     end 
                 end
-                # should not fail if not present
-                ## if an article has no citations yet, the "cites_id" field will not exist
-                if haskey(article, "cited_by") && haskey(article["cited_by"], "cites_id")
-                    pub.scholar_citesid = article["cited_by"]["cites_id"]
+
+                pub.scholar_citesid = begin
+                    if haskey(article, "cited_by") && haskey(article["cited_by"], "cites_id")
+                        article["cited_by"]["cites_id"]
+                    else
+                        nothing
+                    end
                 end
-                push!(publications, pub)
+
+                pub.gscholar_authors = begin
+                    article["authors"]
+                end
+
+                pub.gscholar_citation_count = begin
+                    if haskey(article, "cited_by") && haskey(article["cited_by"], "value")
+                        article["cited_by"]["value"]
+                    else
+                        missing
+                    end
+                end
+
+                @debug "set_serpapi_google_scholar_author!() included a publication" title(pub) date(pub) pub.gscholar_database_link
+                push!(r.abstracts, pub)
             end
         catch y
-            @show y
+            @debug "set_serpapi_google_scholar_author!() exception thrown while setting researcher fields" y
         end
     end
 
-    r.abstracts = publications
     r.success_set_serpapi_google_scholar_author = true
     return nothing
 end
