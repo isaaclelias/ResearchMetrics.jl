@@ -9,7 +9,7 @@ mutable struct Publication
 
     # Scopus
     scopus_title::Union{String, Nothing}
-    scopus_date::Union{Date, Nothing}
+    scopus_date::Union{Date, Nothing, Missing}
     scopus_scopusid::Union{Int, Nothing} # TODO refactor to scopus_id
     scopus_authids::Union{Vector{String}, Nothing}
     scopus_citation_count::Union{TimeArray, Nothing} # I dont thinks this is currently used. If so, could be used to store the "oficial" citation count by that source
