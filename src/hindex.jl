@@ -59,63 +59,6 @@ function scalecurvefinalvalue(timearray, finalvalue::Real)
     return timearray_scaled
 end
 
-#=
-function plothindexevolution(researcher::Researcher; h_index=nothing, scale_final_hindex_to=nothing, indication_offset=Year(2), disconsider_before=nothing, fit_curves_when_hindex_is_higher_than=5)
-
-    # Calculate hindex if not given in function arguments
-    if isnothing(h_index)
-        h_index = hindex(researcher)
-    end
-
-    # Scale the values if the argument for it is given.
-    # The result is that the entire curve is scaled, so the final h_index corresponds to the given one
-    if scale_final_hindex_to |> !isnothing
-        h_index = scalecurvefinalvalue(h_index, scale_final_hindex_to)
-    end
-
-    # Chop out papers before a given date
-    if disconsider_before |> !isnothing
-        h_index = from(h_index, disconsider_before)
-    end
-
-    ## Prizes
-    if prizes(researcher) |> !isnothing
-        
-    end
-
-    indication_date = dateof(prizes(researcher)[1])-indication_offset
-    fit_start_date = first(findwhen(h_index[:A] .> fit_curves_when_hindex_is_higher_than))
-    h_index_before = h_index |> (y -> from(y, fit_start_date)) |> (y->to(y, indication_date))
-    h_index_after = from(h_index, indication_date)
-    x_h_index_before = float(Dates.value.(timestamp(h_index_before)))
-    x_h_index_after = float(Dates.value.(timestamp(h_index_after)))
-    y_h_index_before = float(values(h_index_before))
-    y_h_index_after = float(values(h_index_after))
-    fit_h_index_before = curve_fit(LinearFit, x_h_index_before, y_h_index_before)
-    fit_h_index_after = curve_fit(LinearFit, x_h_index_after, y_h_index_after)
-    #lastname = uppercasen(wessling.lastname, 1)
-    save_date = Dates.format(now(), "YYYY-mm-dd_HH-MM")
-    # Plots
-    plt_hi = plot(h_index, linetype=:steppre, label="h-index", title = "Wessling's H-Index evolution")
-    vline!(plt_hi, [dateof(prizes(researcher)[1])-indication_offset], linestyle=:dash, label = "Indication for Gottfried Wilhelm Leibniz Prize")
-    plot!(plt_hi, x_h_index_before, fit_h_index_before.(x_h_index_before), label="Linear fit before indication")
-    plot!(plt_hi, x_h_index_after, fit_h_index_after.(x_h_index_after), label="Linear fit after indication")
-
-    plt_ann = plot(grid=false, axiscolor=:white, fg_color_text=:white, showaxis=false, size=(40,10))
-    annotate!(plt_ann, [(0/3, 2/2, ("Scopus H-Index: $(scale_final_hindex_to)", 8, :left))])
-    annotate!(plt_ann, [(0/3, 1/2, ("Before indication: increase of $(trunc(fit_h_index_before.coefs[2]*365, digits=1)) per year.", 8, :left))])
-    annotate!(plt_ann, [(0/3, 0/2, ("After indication: increase of $(trunc(fit_h_index_after.coefs[2]*365, digits=1)) per year.", 8, :left))])
-    annotate!(plt_ann, [(0/3, 1/2, ("", 8, :left))])
-
-    @info "used information" x_h_index_before y_h_index_before
-
-    plt = plot(plt_hi, plt_ann, layout=grid(2, 1, heights=(5/6, 1/6)))
-    #savefig("output/hindex_$(lastname)_$(save_date).png")
-
-    return plt
-end
-=#
-
 function setpublications!(
     researcher::Researcher,
     keys::Union{Vector{Symbol}, Symbol};
