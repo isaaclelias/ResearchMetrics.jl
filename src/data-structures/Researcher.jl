@@ -147,41 +147,17 @@ function dataframe_citations(res::Researcher)
     # what do I need to know to evaluate why there's missing data for the hindex?
     pub_title = []
     pub_date = []
-    pub_link = []
-    pub_scopus_id = []
-    pub_scopus_authids = []
     cit_title = []
     cit_date = []
-    cit_gscholar_authids = []
-    pub_success_set_scopus_abstract_retrieval = []
-    pub_success_set_serpapi_google_scholar_search = []
-    pub_success_set_serpapi_google_scholar_cite = []
-    cit_success_set_scopus_search = []
-    cit_success_set_scopus_abstract_retrieval = []
+    cit_pub_link = []
 
     for pub in publications(res)
-        @show "passei por aqui"
         for cit in citations(pub)
-            append!(pub_title, title(pub))
-            append!(pub_date, date(pub))
-            append!(pub_scopus_id,
-                    pub.scopus_scopusid)
-            append!(pub_scopus_authids,
-                    _parse_authids_to_string(pub.scopus_authids))
-            append!(pub_link, link(pub))
-            append!(pub_success_set_scopus_abstract_retrieval,
-                    _parse_success_to_string(pub.success_set_scopus_abstract_retrieval))
-            append!(pub_success_set_serpapi_google_scholar_search,
-                    _parse_success_to_string(pub.success_set_serpapi_google_scholar_search))
-            append!(pub_success_set_serpapi_google_scholar_cite,
-                    _parse_success_to_string(pub.success_set_serpapi_google_scholar_cite))
-            append!(cit_title, title(cit))
-            append!(cit_date, date(cit))
-            append!(cit_gscholar_authids, cit.gscholar_authids)
-            append!(cit_success_set_scopus_search, 
-                    cit.success_set_scopus_search)
-            append!(cit_success_set_scopus_abstract_retrieval,
-                    cit.success_set_scopus_abstract_retrieval)
+            push!(pub_title, title(pub))
+            push!(pub_date, date(pub))
+            push!(cit_title, title(cit))
+            push!(cit_date, date(cit))
+            push!(cit_pub_link, cit.gscholar_pub_link)
             @show "passei por aqui também"
         end
     end
@@ -189,40 +165,42 @@ function dataframe_citations(res::Researcher)
     df = Dict(
         "PublicationTitle" => pub_title,
         "PublicationDate" => pub_date,
-        "PublicationLink" => pub_link,
-        "PublicationScopusId" => pub_scopus_id,
-        "PublicationScopusAuthorIds" => pub_scopus_authids,
         "CitationTitle" => cit_title,
         "CitationDate" => cit_date,
-        "PublicantionSuccededScopusAbstractRetrieval" => pub_success_set_scopus_abstract_retrieval,
-        "PublicationSuccededSerpapiGoogleScholarSearch" => pub_success_set_serpapi_google_scholar_search,
-        "PublicationSuccededSerpapiGoogleScholarCite" => pub_success_set_serpapi_google_scholar_cite,
-        "CitationSuccededGoogleScholarAuthorIds" => cit_gscholar_authids,
-        "CitationSuccededScopusSearch" => cit_success_set_scopus_search,
-        "CitationSuccededScopusAbstractRetrieval" => cit_success_set_scopus_abstract_retrieval
-    )
+        "CitationPublicationLink" => cit_pub_link
+    ) |> DataFrame |> x->sort!(x, :CitationDate)
 
     return df
 end
+
+_if_nothing_then_missing(x) = isnothing(x) ? missing : x
 
 function dataframe_publications(res::Researcher)
     # what do I need to know to evaluate why there's missing data for the hindex?
     pub_title = []
     pub_date = []
-    pub_link = []
+    pub_gscholar_database_link = []
+    pub_gscholar_authors = []
+    pub_gscholar_citation_count = []
+    pub_gscholar_cites_id = []
 
     for pub in publications(res)
-        @show "passei por aqui"
         push!(pub_title, title(pub))
         push!(pub_date, date(pub))
-        push!(pub_link, link(pub))
+        push!(pub_gscholar_authors, _if_nothing_then_missing(pub.gscholar_authors))
+        push!(pub_gscholar_citation_count, _if_nothing_then_missing(pub.gscholar_citation_count))
+        push!(pub_gscholar_database_link, _if_nothing_then_missing(pub.gscholar_database_link))
+        push!(pub_gscholar_cites_id, _if_nothing_then_missing(pub.scholar_citesid))
     end
 
     df = Dict(
-        "PublicationTitle" => pub_title,
-        "PublicationDate" => pub_date,
-        "PublicationLink" => pub_link,
-    )# |> x->DataFrame(x)
+        "Title" => pub_title,
+        "Date" => pub_date,
+        "DatabaseLink" => pub_gscholar_database_link,
+        "GoogleScholarCitesID" => pub_gscholar_cites_id,
+        "GoogleScholarAuthors" => pub_gscholar_authors,
+        "GoogleScholarCitationCount" => pub_gscholar_citation_count,
+    ) |> DataFrame |> x->sort!(x, [:Date])
 
     return df
 end

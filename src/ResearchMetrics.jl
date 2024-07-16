@@ -26,6 +26,7 @@ export Prize, dateof, nameof
 include("data-structures/Researcher.jl")
 export Researcher
 export publications, prizes, citationcount, citations, citationdates, hindexat, mapcitations, mappublications
+export dataframe_publications, dataframe_citations
 
 include("local.jl")
 export setworkingdir
