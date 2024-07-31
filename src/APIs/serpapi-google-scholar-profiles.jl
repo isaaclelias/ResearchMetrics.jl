@@ -28,7 +28,7 @@ function set_serpapi_google_scholar_profiles!(r::Researcher)
     r.success_set_serpapi_google_scholar_profiles = false
     
     response = query_serpapi_google_scholar_profiles(
-        r.firstname*" "*r.lastname
+        r.user_gscholar_query
     )
 
     try

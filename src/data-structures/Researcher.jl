@@ -11,6 +11,8 @@ Tasks:
 mutable struct Researcher
     # Basic info
     # TODO refactor to `user_` to indicate that they where supplied by the user
+    user_gscholar_query::Union{String, Nothing}
+    name::Union{String, Nothing}
     firstname::Union{String, Nothing}
     lastname::Union{String, Nothing}
     affiliation::Union{String, Nothing}
@@ -41,6 +43,17 @@ mutable struct Researcher
     success_set_serpapi_google_scholar_cited_by::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_profiles::Union{Bool, Nothing}
     
+    function Researcher(
+            ; # only keyword arguments
+            name::AbstractString,
+            user_gscholar_query::AbstractString
+        )
+        
+        author = new(ntuple(x->nothing, fieldcount(Author))...)
+        author.name = name
+        author.user_gscholar_query = user_gscholar_query
+        return author
+    end
 
     # Enforce that `Author` has at least these two fields filled up
     function Researcher(lastname::String, affiliation::String; prizes=nothing)
