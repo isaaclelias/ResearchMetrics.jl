@@ -25,12 +25,15 @@ function query_serpapi_google_scholar_author(gscholar_author_id::AbstractString;
     return response
 end
 
-function set_serpapi_google_scholar_author!(r::Researcher)
+function set_serpapi_google_scholar_author!(r::Researcher; progress_bar::Bool=false)
     r.success_set_serpapi_google_scholar_author = false
     r.abstracts = Publication[]
 
     start = 0
+    n_articles = 0
+    progress = ProgressUnknown(desc="Retrieved publications:")
     while !isnothing(start) # no, God, please no
+        #progress_bar && print("Number of publications: $n_articles\r")
         # get a response from somewhere
         response_parse = nothing  
         try
@@ -86,8 +89,13 @@ function set_serpapi_google_scholar_author!(r::Researcher)
                     end
                 end
 
+                n_articles = n_articles + 1
+
+                pub.success_set_serpapi_google_scholar_author = true
                 @debug "set_serpapi_google_scholar_author!() included a publication" title(pub) date(pub) pub.gscholar_database_link
                 push!(r.abstracts, pub)
+                #progress_bar && print("Number of publications: $(length(publications(r)))\r")
+                progress_bar && next!(progress)
             end
         catch y
             @debug "set_serpapi_google_scholar_author!() exception thrown while setting researcher fields" y
@@ -95,5 +103,7 @@ function set_serpapi_google_scholar_author!(r::Researcher)
     end
 
     r.success_set_serpapi_google_scholar_author = true
+    #isnothing(start) && progress_bar && print("\n") # new line
+    progress_bar && finish!(progress)
     return nothing
 end

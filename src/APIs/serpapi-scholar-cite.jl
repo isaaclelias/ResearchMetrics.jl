@@ -3,7 +3,7 @@
 
 Fetches list of citations for a given publication using Google Scholar Cite through SerpApi. The query first tries to retrieve the information in the local cache
 """
-function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::Bool=false)::Union{Vector{Abstract}, Nothing}
+function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::Bool=false, progress_bar::Bool=false, progress)::Union{Vector{Abstract}, Nothing}
     abstract.success_set_serpapi_google_scholar_cite = false
     # Dealing with lack of information
     ## Nothing
@@ -86,6 +86,7 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
                 end
             end
             push!(citations, citation)
+            next!(progress)
             @debug "`querySerpapiGScholarCite` found citation found" citation.title
         end
 
@@ -110,8 +111,25 @@ function _parse_gscholar_summary_to_date(s::AbstractString)
     return Date(dat)
 end
 
-function set_serpapi_google_scholar_cite!(abstract::Publication; only_local::Bool=false)::Nothing    
-    abstract.scopus_citations = querySerapiGScholarCite(abstract, only_local=only_local)
+function set_serpapi_google_scholar_cite!(
+        abstract::Publication;
+        only_local::Bool=false,
+        progress_bar::Bool=false,
+        progress=nothing
+    )::Nothing 
+
+    _progress = nothing
+    if isnothing(progress)
+        _progress = ProgressUnknown(desc="Retrieved citations:", spinner=true)
+    else
+        _progress = progress
+    end
+    abstract.scopus_citations = querySerapiGScholarCite(abstract, only_local=only_local, progress=_progress)
+
+    if isnothing(progress)
+        finish!(_progress)
+    end
+
     return nothing
 end
 @deprecate setCitations!(abstract::Abstract; only_local::Bool=false) setSerpapiGScholarCite!(abstract, only_local=only_local)
@@ -119,11 +137,29 @@ end
 
 function set_serpapi_google_scholar_cite!(author::Researcher; only_local::Bool=false, progress_bar=false)::Nothing
     @debug "`setSerpapiGScholarCite!(::Researcher)`" length(author.abstracts)
+    progress = ProgressUnknown(desc="Retrieved citations: grande", spinner=true)
     for i in 1:length(author.abstracts)
-        setSerpapiGScholarCite!(author.abstracts[i], only_local=only_local)
+        setSerpapiGScholarCite!(author.abstracts[i], only_local=only_local, progress=progress)
     end
+
+    finish!(progress)
     return nothing
 end
 @deprecate setSerpapiGScholarCite!(a::Researcher; only_local::Bool=false) set_serpapi_google_scholar_cite!(a, only_local=only_local)
 @deprecate setCitations!(author::Author; only_local::Bool=false, progress_bar::Bool=false) setCitationsWithSerpapiGScholarCite!(author, only_local=only_local, progress_bar=progress_bar)
 
+function set_serpapi_google_scholar_cite_2!(
+    r::Researcher;
+    only_local::Bool=false,
+    progress_bar::Bool=false
+)
+
+    progress = ProgressUnknown(desc="Retrieved citations:", spinner=true)
+    mappublications(
+        x->set_serpapi_google_scholar_cite!(x, only_local=only_local, progress=progress),
+        r,
+        progress_bar=progress_bar
+    )
+    finish!(progress)
+  
+end
