@@ -72,7 +72,6 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
             citation = Abstract(item["title"])
             citation.gscholar_date = begin
                 if haskey(item, "publication_info") && haskey(item["publication_info"], "summary")
-                    @show item["publication_info"]["summary"]
                     _parse_gscholar_summary_to_date(item["publication_info"]["summary"])
                 else
                     missing

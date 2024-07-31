@@ -171,7 +171,6 @@ function dataframe_citations(res::Researcher)
             push!(cit_title, title(cit))
             push!(cit_date, date(cit))
             push!(cit_pub_link, cit.gscholar_pub_link)
-            @show "passei por aqui também"
         end
     end
 
