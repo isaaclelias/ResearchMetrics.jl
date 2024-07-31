@@ -59,6 +59,8 @@ export hindex, setinfoforhindex!, plothindexevolution
 include("workflows/hindex_scopus_serpapi.jl")
 export set_needed_for_hindex_with_scopus_serpapi!
 
+include("workflows/hevolution.jl")
+
 # misc
 export arein
 

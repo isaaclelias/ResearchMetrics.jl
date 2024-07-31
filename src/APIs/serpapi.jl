@@ -10,6 +10,3 @@ function setSerapiApiKey(api_key::String)::Nothing
 
     return nothing
 end
-
-include("serpapi-scholar.jl")
-include("serpapi-scholar-cite.jl")
