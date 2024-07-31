@@ -28,6 +28,7 @@ mutable struct Publication
     gscholar_pub_link::Union{String, Nothing, Missing}
     #gscholar_link_domain::Union{String, Nothing} # like link.springer.com
     scholar_citesid::Union{String, Nothing, Missing} # TODO refactor to `gscholar`
+    success_set_serpapi_google_scholar_author::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_search::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_cite::Union{Bool, Nothing}
 

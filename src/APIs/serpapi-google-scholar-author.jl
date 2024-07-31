@@ -58,6 +58,7 @@ function set_serpapi_google_scholar_author!(r::Researcher; progress_bar::Bool=fa
         try
             for article in response_parse["articles"]
                 pub = Publication()
+                pub.success_set_serpapi_google_scholar_author = false
                 pub.gscholar_title = article["title"]
                 pub.gscholar_database_link = article["link"]
 
