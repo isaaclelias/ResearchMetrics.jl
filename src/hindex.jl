@@ -25,7 +25,7 @@ end
 
 Returns a TimeArray with the h-index of the given researcher in function of time.
 """
-function hindex(author::Researcher)::TimeArray
+@memoize function hindex(author::Researcher)::TimeArray
     abstracts = publications(author)
     all_citation_dates = citationdates(author) # Getting a list of all publication dates
     hindex_current = 0
