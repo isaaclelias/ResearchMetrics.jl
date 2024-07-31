@@ -149,7 +149,8 @@ function set_serpapi_google_scholar_cite!(author::Researcher; only_local::Bool=f
     finish!(progress)
     return nothing
 end
-@deprecate setSerpapiGScholarCite!(a::Researcher; only_local::Bool=false) set_serpapi_google_scholar_cite!(a, only_local=only_local)
+@deprecate setSerpapiGScholarCite!(r::Researcher; only_local::Bool=false) set_serpapi_google_scholar_cite!(r, only_local=only_local)
+@deprecate setSerpapiGScholarCite!(p::Publication; only_local::Bool=false, progress=nothing) set_serpapi_google_scholar_cite!(p, only_local=only_local, progress=progress)
 @deprecate setCitations!(author::Author; only_local::Bool=false, progress_bar::Bool=false) setCitationsWithSerpapiGScholarCite!(author, only_local=only_local, progress_bar=progress_bar)
 
 function set_serpapi_google_scholar_cite_2!(
