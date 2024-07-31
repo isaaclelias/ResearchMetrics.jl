@@ -8,14 +8,21 @@ using JSON
 using TimeSeries
 using Dates
 using SHA
-using ProgressBars
+using ProgressBars # TODO refactor to ProgressMeter
+using ProgressMeter
 using CurveFit
 using DataFrames
+using ArgParse
+using Logging
+using LoggingExtras
+using Plots
+using Memoize
 
 include("logging.jl")
 
 include("APIs/ApiKeys.jl")
-export setScopusKey, setSerpApiKey
+export setScopusKey, prompt_to_set_scopus_key
+export setSerpApiKey
 
 include("data-structures/Publication.jl")
 export Publication, title
