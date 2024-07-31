@@ -87,6 +87,7 @@ function citationdates(author::Researcher)::Vector{Date}
         end
     end
     sort!(all_citation_dates)
+    #unique!(all_citation_dates)
     return all_citation_dates
 end
 @deprecate getCitationDates(author::Author) citationdates(author)
@@ -229,4 +230,13 @@ function name(r::Researcher)
     else
         throw(UndefRefError())
     end
+end
+
+function delete_inconsistent_citations!(r::Researcher)
+    n_inconsistent_citations = mappublications(x->delete_inconsistent_citations!(x), r) 
+    deleteat!(
+        n_inconsistent_citations,
+        findall(x->(ismissing(x) || isnothing(x)), n_inconsistent_citations)
+        )
+    return sum(n_inconsistent_citations)
 end

@@ -103,7 +103,13 @@ function date(p::Publication)
 end
 
 function link(p::Publication)
-  
+    if !isnothing(p.scopus_link) && !ismissing(p.scopus_link);         return p.scopus_link
+    elseif !isnothing(p.gscholar_link) && !ismissing(p.gscholar_link); return p.gscholar_link
+    else
+        if any(ismissing.([p.scopus_link, p.gscholar_link]));          return missing
+        else;                                                          return nothing
+        end
+    end
 end
 
 ########## CALCULATIONS - needs better name ##########
@@ -122,11 +128,12 @@ function citationdates(abstract::Publication)::Union{Vector{Date}, Nothing}
     end
 
     for citation in abstract.scopus_citations
-        if !isnothing(date(citation))# && !ismissing(date(citation))
+        if !(isnothing(date(citation)) || ismissing(date(citation)))# && !ismissing(date(citation))
             push!(citation_dates, date(citation))
         end
     end
     sort!(citation_dates)
+    #unique!(citation_dates)
     return citation_dates
 end
 @deprecate getCitationDates(article::Publication) citationdates(article)
@@ -169,4 +176,31 @@ function authids(p::Publication)
   
 end
 
+function database_link(pub::Publication)
+    error("I don't know if this function should exist")
+    if     !isnothing(pub.scopus_link);   return pub.scopus_link
+    elseif !isnothing(pub.gscholar_link); return pub.gscholar_link
+    else;                                 return nothing
+    end
+end
 
+function delete_inconsistent_citations!(p::Publication)
+    # delete citations that cite papers published in the future
+    # we don't assume time travel possible here
+    date_pub = date(p)
+    if isnothing(date_pub) || ismissing(date_pub) || isnothing(p.scopus_citations)
+        return nothing
+    end
+
+    delete_positions = findall(
+        x -> !(isnothing(date(x)) || ismissing(date(x))) && date(x) < date_pub,
+        p.scopus_citations
+    )
+
+    deleteat!(
+        p.scopus_citations,
+        delete_positions
+    )
+
+    return length(delete_positions)
+end
