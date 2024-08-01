@@ -92,13 +92,17 @@ function hevolution(
 
     plt = plot_hindex(researcher)
     addprizes!(plt, prizes)
-    _save_plot(plt, researcher)
+    _save_plot(plt)
+
+    df_p = dataframe_publications(researcher)
+    CSV.write("publications.csv", df_p)
+
+    df_c = dataframe_citations(researcher)
+    CSV.write("citations.csv", df_c)
 
     cd("..")
     cd("..")
     return researcher
-    # plot
-    # csv
 end
 
 function summary_set_serpapi_google_scholar_author(r)
@@ -148,9 +152,8 @@ function plot_hindex(r::Researcher)
     return plt
 end
 
-function _save_plot(plt, r)
-    name_plt = replace(r.name, " "=>"")
-    savefig(plt, name_plt*".png")
+function _save_plot(plt)
+    savefig(plt, "plot.png")
 end
 
 function addprizes!(plt, prizes)

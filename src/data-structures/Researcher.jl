@@ -180,7 +180,7 @@ function dataframe_citations(res::Researcher)
         "PublicationDate" => pub_date,
         "CitationTitle" => cit_title,
         "CitationDate" => cit_date,
-        "CitationPublicationLink" => cit_pub_link
+        "CitationLink" => cit_pub_link
     ) |> DataFrame |> x->sort!(x, :CitationDate)
 
     return df
@@ -210,8 +210,8 @@ function dataframe_publications(res::Researcher)
         "Title" => pub_title,
         "Date" => pub_date,
         "DatabaseLink" => pub_gscholar_database_link,
-        "GoogleScholarCitesID" => pub_gscholar_cites_id,
-        "GoogleScholarAuthors" => pub_gscholar_authors,
+        #"GoogleScholarCitesID" => pub_gscholar_cites_id,
+        "Authors" => pub_gscholar_authors,
         "GoogleScholarCitationCount" => pub_gscholar_citation_count,
     ) |> DataFrame |> x->sort!(x, [:Date])
 
