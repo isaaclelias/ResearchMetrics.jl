@@ -92,6 +92,7 @@ function hevolution(
 
     plt = plot_hindex(researcher)
     addprizes!(plt, prizes)
+    format_xticks!(plt)
     _save_plot(plt)
 
     df_p = dataframe_publications(researcher)
@@ -192,4 +193,16 @@ function _parse_prizes(prizes)
     end
 
     return _prizes
+end
+
+function format_xticks!(plt)
+    @show xticks(plt)
+    _xticks_v = xticks(plt)[1][1]
+    _xticks_d = xticks(plt)[1][2]
+
+    _xticks_d = _xticks_d .|> Date .|> x->Dates.format(x, "YYYY")
+
+    plot!(plt, xticks=(_xticks_v, _xticks_d))
+
+    return nothing
 end
