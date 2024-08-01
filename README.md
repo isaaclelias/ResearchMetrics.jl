@@ -15,6 +15,16 @@ git clone https://github.com/isaaclelias/ResearchMetrics.jl
 cd ResearchMetrics.jl
 ```
 
+Create a file named `Secrets.jl` and include the SerpApi key in the following format:
 
+```
+serpapi = "KEY"
+```
 
+With the key properly set, just call the program with:
 
+```
+./hevolution --name NAME [--prize YEAR PRIZE_NAME]
+```
+
+And afterwads the results will be placed inside the `results` folder.
