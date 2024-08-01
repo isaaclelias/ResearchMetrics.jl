@@ -17,6 +17,7 @@ using Logging
 using LoggingExtras
 using Plots
 using Memoize
+using TOML
 
 include("logging.jl")
 
