@@ -5,7 +5,6 @@ src/secrets.jl
 output/
 logs/
 hindex_analysis.ipynb
-researchers.jls
 *.jls
 results/
 Secrets.toml
