@@ -10,13 +10,16 @@ function setScopusKey(key::AbstractString)
 end
 
 function prompt_to_set_scopus_key()
-    if length(scopus_api_key) !== 0
-        @info "Scopus API key is already set." scopus_api_key
+    _parsed_secrets = TOML.parsefile("Secrets.toml")
+    setSerpApiKey(_parsed_secrets["serpapi"])
+
+    if length(serapi_api_key) !== 0
+        @debug "SerpApi API key is already set."
         return nothing
     end
 
-    @info "Scopus API key is not set. Please insert the key below."
-    print("Scopus API key: ")
+    @info "SerpApi API key is not set. Please insert the key below."
+    print("SerpApi API key: ")
     setSerpApiKey(readline())
 
     return nothing
