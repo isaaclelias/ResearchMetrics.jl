@@ -104,6 +104,14 @@ function querySerapiGScholarCite(abstract::Abstract, start::Int=0; only_local::B
     return citations
 end
 
+function request_serpapi_google_scholar_cite_api(gscholar_citesid::AbstractString; start::Int=0)
+  
+end
+
+function query_serpapi_google_scholar_cite(arguments)
+  
+end
+
 function _parse_gscholar_summary_to_date(s::AbstractString)
   r = r" ((?:19|20)[0-9]{2}) " # matches any number between 1900 and 2099
     dat = match(r, s)

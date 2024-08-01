@@ -162,3 +162,7 @@ end
 function export_citations_to_csv()
   
 end
+
+function hindex(df::DataFrame)
+     
+end
