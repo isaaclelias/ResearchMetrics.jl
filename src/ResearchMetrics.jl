@@ -19,6 +19,7 @@ using Plots
 using Memoize
 using TOML
 using CSV
+using XLSX
 
 include("logging.jl")
 
