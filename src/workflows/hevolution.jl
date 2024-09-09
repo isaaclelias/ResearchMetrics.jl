@@ -55,6 +55,8 @@ function main_hevolution()
         end
     elseif parsed_args["from-wos-report"]
         hevolution_wos_report(parsed_args["file"])
+    else
+        println("Please use a source flag. E.g.: --from-gscholar . The complete list of sources can be found using --help .")
     end
     return 0 # EXIT POINT
 end
