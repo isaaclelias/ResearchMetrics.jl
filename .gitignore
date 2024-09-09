@@ -8,3 +8,4 @@ hindex_analysis.ipynb
 *.jls
 results/
 Secrets.toml
+*.xlsx
