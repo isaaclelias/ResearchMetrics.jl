@@ -1,4 +1,3 @@
-export setSerapiApiKey, setScholarBasicFields!, querySerapiGScholarCite, querySerapiGScholar
 
 serapi_fprefix = "Serapi-GoogleScholar"
 serpapiGScholarCite_fprefix = "Serpapi-GScholarCite"
