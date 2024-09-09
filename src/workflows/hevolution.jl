@@ -26,6 +26,8 @@ function main_hevolution()
             action = :store_true
         "--from-scopus-and-gscholar"
             action = :store_true
+        "--from-wos-report"
+            action = :store_true
         "file"
     end
 
