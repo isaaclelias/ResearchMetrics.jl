@@ -70,6 +70,12 @@ export set_needed_for_hindex_with_scopus_serpapi!
 
 include("workflows/hevolution.jl")
 
+include("workflows/hevolution_gscholar.jl")
+export hevolution_gscholar
+
+include("workflows/hevolution_wos.jl")
+export hevolution_wos
+
 # misc
 export arein
 
