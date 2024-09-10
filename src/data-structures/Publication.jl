@@ -1,3 +1,9 @@
+# The main reason this struct is as it its, all cluttered and brimming with fields, is because I want to be able to set informations from different sources with the same item type.
+# A less cluttered way I thought about was to use tuples or some other container always pairing the information with its source. That way any information would be unique, but only one could be set.
+# In this way, it's also possible to prioritize the source of information we use. For example, by now, the function name(::Researcher) first tries to get the name from Web of Science, and falls back subsequentially to Scopus, Google Scholar and user provided name. This way I can set information from various different sources, and try to retrieve the most trusted one.
+# `missing` values should be used for information that was _tried_ to be retrieved, but couldn't be set for any reason.
+# `nothing` values should be used to represent fields that never were even tried to be set.
+# I think this schema should be cristalized here, only with new fields being added, as changing it would require pratically a complete rewrite.
 """
 Type used to represent a scientific publication.
 """
@@ -31,6 +37,11 @@ mutable struct Publication
     success_set_serpapi_google_scholar_author::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_search::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_cite::Union{Bool, Nothing}
+
+    # Web of Science Report
+    wosrep_title::Union{String, Nothing}
+    wosrep_date::Union{Date, Nothing}
+    wosrep_citation_count_evol::Union{TimeArray, Nothing}
 
     # overrides? # TODO
     # over_title
