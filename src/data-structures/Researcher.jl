@@ -42,11 +42,22 @@ mutable struct Researcher
     success_set_serpapi_google_scholar_author::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_cited_by::Union{Bool, Nothing}
     success_set_serpapi_google_scholar_profiles::Union{Bool, Nothing}
-    
+
+    # Web of Science Report
+    wosrep_name::Union{String, Nothing}
+    wosrep_hindex::Union{Int, Nothing}
+    wosrep_citation_count::Union{Int, Nothing}
+    wosrep_timespan::Union{Tuple{Int, Int}, Nothing}
+
+    function Researcher()
+        researcher = new(ntuple(x->nothing, fieldcount(Researcher))...)
+        return researcher
+    end
+   
     function Researcher(
             ; # only keyword arguments
-            name::AbstractString,
-            user_gscholar_query::AbstractString
+            name::Union{AbstractString, Nothing}=nothing,
+            user_gscholar_query::Union{AbstractString, Nothing}=nothing # this is a quick fix
         )
         
         author = new(ntuple(x->nothing, fieldcount(Author))...)
