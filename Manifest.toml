@@ -2,7 +2,12 @@
 
 julia_version = "1.10.4"
 manifest_format = "2.0"
-project_hash = "3fbe70534677bf6fa0c9f7639ea9797355648d22"
+project_hash = "0d4b46060773874253b9f0392f06f2bac2e49720"
+
+[[deps.AbstractTrees]]
+git-tree-sha1 = "2d9c9a55f9c93e8887ad391fbae72f8ef55e1177"
+uuid = "1520ce14-60c1-5f80-bbc7-55ef81b5835c"
+version = "0.4.5"
 
 [[deps.ArgParse]]
 deps = ["Logging", "TextWrap"]
@@ -201,6 +206,12 @@ git-tree-sha1 = "1c6317308b9dc757616f0b5cb379db10494443a7"
 uuid = "2e619515-83b5-522b-bb60-26c02a35a201"
 version = "2.6.2+0"
 
+[[deps.Eyeball]]
+deps = ["AbstractTrees", "FoldingTrees", "Humanize", "InteractiveUtils", "REPL", "Statistics", "TerminalPager"]
+git-tree-sha1 = "61886e3ee7b9b6904e1aa3e48121c68d305d6cbe"
+uuid = "ce36242b-ad83-4f84-8519-47cd8aeefd60"
+version = "0.5.1"
+
 [[deps.EzXML]]
 deps = ["Printf", "XML2_jll"]
 git-tree-sha1 = "380053d61bb9064d6aa4a9777413b40429c79901"
@@ -233,6 +244,12 @@ deps = ["Statistics"]
 git-tree-sha1 = "05882d6995ae5c12bb5f36dd2ed3f61c98cbb172"
 uuid = "53c48c17-4a7d-5ca2-90c5-79b7896eea93"
 version = "0.8.5"
+
+[[deps.FoldingTrees]]
+deps = ["AbstractTrees", "REPL"]
+git-tree-sha1 = "d94efd85f2fe192cdf664aa8b7c431592faed59e"
+uuid = "1eca21be-9b9b-4ed8-839a-6d8ae26b1781"
+version = "1.2.1"
 
 [[deps.Fontconfig_jll]]
 deps = ["Artifacts", "Bzip2_jll", "Expat_jll", "FreeType2_jll", "JLLWrappers", "Libdl", "Libuuid_jll", "Zlib_jll"]
@@ -313,6 +330,12 @@ deps = ["Artifacts", "Cairo_jll", "Fontconfig_jll", "FreeType2_jll", "Glib_jll",
 git-tree-sha1 = "129acf094d168394e80ee1dc4bc06ec835e510a3"
 uuid = "2e76f6c2-a576-52d4-95c1-20adfe4de566"
 version = "2.8.1+1"
+
+[[deps.Humanize]]
+deps = ["Dates", "Printf", "Test"]
+git-tree-sha1 = "f7f2a0a920ad015da58d016587aaf4af4fa6ad5e"
+uuid = "7ec9b9c5-1998-51e1-b7fc-fc3590c18259"
+version = "1.0.0"
 
 [[deps.InlineStrings]]
 deps = ["Parsers"]
@@ -904,6 +927,12 @@ deps = ["LinearAlgebra"]
 git-tree-sha1 = "1feb45f88d133a655e001435632f019a9a1bcdb6"
 uuid = "62fd8b95-f654-4bbd-a8a5-9c27f68ccd50"
 version = "0.1.1"
+
+[[deps.TerminalPager]]
+deps = ["Crayons", "REPL", "StringManipulation"]
+git-tree-sha1 = "da395bf4547bbcae8f3157445e8007874ee76df2"
+uuid = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
+version = "0.4.0"
 
 [[deps.Test]]
 deps = ["InteractiveUtils", "Logging", "Random", "Serialization"]
