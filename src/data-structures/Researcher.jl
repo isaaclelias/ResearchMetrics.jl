@@ -47,7 +47,7 @@ mutable struct Researcher
     wosrep_name::Union{String, Nothing}
     wosrep_hindex::Union{Int, Nothing}
     wosrep_citation_count::Union{Int, Nothing}
-    wosrep_timespan::Union{Tuple{Int, Int}, Nothing}
+    wosrep_timespan::Union{Tuple{Date, Date}, Nothing}
 
     function Researcher()
         researcher = new(ntuple(x->nothing, fieldcount(Researcher))...)

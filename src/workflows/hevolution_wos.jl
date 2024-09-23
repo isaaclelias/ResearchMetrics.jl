@@ -17,11 +17,11 @@ end
 """
 Parses the timespan of publications cointained in the cell "A2" of a wos_report.
 """
-function timespan_from_wos_report(wos_report::XLSX.XLSXFile)
+function timespan_from_wos_report(wos_report::XLSX.XLSXFile)::Tuple{Date, Date}
     cel = wos_report["savedrecs"]["A2"]
     #should use that, but i'm going with the fast alternative of just counting string indexes instead of regex
-    beginning = cel[11:14] |> x->parse(Int, x)
-    ending = cel[16:19] |> x->parse(Int, x)
+    beginning = cel[11:14] |> x->Date(x)
+    ending = cel[16:19] |> x->Date(x)
 
     return (beginning, ending)
 end
@@ -61,8 +61,11 @@ Parses the citation count present in line `i` of the wos_report. By now it assum
 function citation_count_evol_from_wos_report(wos_report::XLSX.XLSXFile, i::Int)::TimeArray
     wr = wos_report["savedrecs"]
     si = string(i)
-    timespan = timespan_from_wos_report(wos_report) 
-    n_years_active = timespan[2] - timespan[1]
+    timespan = timespan_from_wos_report(wos_report)
+    beginning = timespan[1] |> x->Dates.format(x, "YYYY") |> x->parse(Int, x)
+    ending = timespan[2] |> x->Dates.format(x, "YYYY") |> x->parse(Int, x)
+    n_years_active = ending - beginning
+
     dates = Date[]
     citation_count = 0
     citation_counts = Int[]
