@@ -166,3 +166,24 @@ end
 function hindex(df::DataFrame)
      
 end
+
+function hindex_evol_from_wos_report(res::Researcher)::TimeArray
+    hindexes       = Int[]
+    hindexes_dates = Date[]
+
+    # get the h-index for each year in the timespan
+    for year in res.wosrep_timespan[1]:Year(1):res.wosrep_timespan[2]
+        citation_counts_at_year = Int[]
+        # get the citation count for each publication in the given year
+        for pub in res.abstracts
+            citation_count_at_year = values(to(pub.wosrep_citation_count_evol, year)[end])[begin]
+            push!(citation_counts_at_year, citation_count_at_year)
+        end
+
+        hindex_at_year = hindex(citation_counts_at_year)
+        push!(hindexes, hindex_at_year)
+        push!(hindexes_dates, year)
+    end
+
+    _hindex_evol = TimeArray(hindexes_dates, hindexes)
+end
