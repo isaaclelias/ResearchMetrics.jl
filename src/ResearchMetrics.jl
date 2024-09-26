@@ -71,6 +71,8 @@ export hindex, setinfoforhindex!, plothindexevolution
 include("workflows/hindex_scopus_serpapi.jl")
 export set_needed_for_hindex_with_scopus_serpapi!
 
+include("plotting.jl")
+
 include("workflows/hevolution.jl")
 
 include("workflows/hevolution_gscholar.jl")

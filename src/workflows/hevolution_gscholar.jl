@@ -107,17 +107,6 @@ function _save_plot(plt)
     savefig(plt, "plot.png")
 end
 
-function addprizes!(plt, prizes)
-    _prizes = _parse_prizes(prizes)
-    if isnothing(_prizes) || length(_prizes) == 0
-        return nothing
-    end
-
-    for prize in _prizes
-        vline!(plt, [dateof(prize)], label=nameof(prize))
-    end
-end
-
 function wait_for_key(prompt)
   println(stdout, prompt)
 	read(stdin, 1);
@@ -132,26 +121,3 @@ function format_name(r::Researcher)
     nam = r.name
 end
 
-function _parse_prizes(prizes)
-    if length(prizes) == 0
-        return nothing
-    end
-
-    _prizes = Prize[]
-    for prize in prizes
-        push!(_prizes, Prize(prize[2], prize[1]))
-    end
-
-    return _prizes
-end
-
-function format_xticks!(plt)
-    _xticks_v = xticks(plt)[1][1]
-    _xticks_d = xticks(plt)[1][2]
-
-    _xticks_d = _xticks_d .|> Date .|> x->Dates.format(x, "YYYY")
-
-    plot!(plt, xticks=(_xticks_v, _xticks_d))
-
-    return nothing
-end
