@@ -1,10 +1,10 @@
 # ResearchMetrics.jl
 
-Fetch science databases and analyse research metrics. The package can fetch data from Scopus and Google Scholar and evaluate the H-Index evolution on time for a given researcher.
+Collection of tools to evaluate H-Indexes in respect to time using Google Scholar, Scopus and Web of Science data.
 
 # hevolution
 
-## Instalation and usage
+## Instalation
 
 First of all, install [Julia](https://julialang.org/).
 
@@ -14,6 +14,14 @@ That being done, clone this repository to a folder and `cd` into the newly creat
 git clone https://github.com/isaaclelias/ResearchMetrics.jl
 cd ResearchMetrics.jl
 ```
+
+## Using Web of Science Report
+
+To use this approach, one must have the XLSX file provided by Web of Science reporting the number of citations each of the researcher's publications received per year. After that, place the file inside the ResearchMetrics.jl folder and run the following command substituting `NAME`, `YEAR` and `PRIZE_NAME`:
+
+`./hevolution --from-wos-report file.xlsx --name "NAME" --prize YEAR "PRIZE_NAME"`
+
+## Using Google Scholar
 
 Create a file named `Secrets.jl` and include the SerpApi key in the following format:
 
