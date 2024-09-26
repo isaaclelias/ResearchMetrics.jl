@@ -11,7 +11,7 @@ function main_hevolution()
     @add_arg_table! settings begin
         "--name", "-n"
             help = """Name of the researcher in question in the format "FIRSTNAME LASTNAME". """
-            #help = "Name of the researcher to be searched for. Provide it using quotes when more than one word is passed. ATTENTION: the name passed should return the researcher profile as the first search result when searched for in Google Scholar. Check for this before using. If needed, the --affiliation option can be used to further narrow down the search."
+            #help = "Name of the researcher to be searched for. Provide it using quotes when more than one word is passed."
         "--query", "-q"
             help = "Ignore NAME and search Google Scholar using QUERY. NAME is still required to plot."
         "--local-database-only", "-l"
@@ -22,11 +22,16 @@ function main_hevolution()
             nargs = 2
             metavar = ["YEAR", "PRIZE_NAME"]
             action = :append_arg
+        "--no-trend-lines"
+            help = "Don't add trend lines to the graph"
+            action = :store_true
         "--from-gscholar"
+            help = "Use data from Google Scholar via SerpApi. ATTENTION: the name passed should return the researcher profile as the first search result when searched for in Google Scholar. Check for this before using. If needed, the --affiliation option can be used to further narrow down the search."
             action = :store_true
         "--from-scopus-and-gscholar"
             action = :store_true
         "--from-wos-report"
+            help = ""
             action = :store_true
         "file"
     end
@@ -54,7 +59,12 @@ function main_hevolution()
             ) 
         end
     elseif parsed_args["from-wos-report"]
-        hevolution_wos_report(parsed_args["file"])
+        hevolution_wos_report(
+            parsed_args["file"],
+            parsed_args["prize"],
+            parsed_args["no-trend-lines"],
+            parsed_args["name"]
+        )
     else
         println("Please use a source flag. E.g.: --from-gscholar . The complete list of sources can be found using --help .")
     end
