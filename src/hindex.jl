@@ -186,4 +186,17 @@ function hindex_evol_from_wos_report(res::Researcher)::TimeArray
     end
 
     _hindex_evol = TimeArray(hindexes_dates, hindexes)
+
+    # strip of the frist years where the h-index is 0
+    # find first
+    date_first_hindex = Date(0)
+    for (i, ts) in enumerate(_hindex_evol)
+        if values(ts)[2] > 0
+            date_first_hindex = timestamp(_hindex_evol[i-1])[begin]
+            break
+        end
+    end
+    _hindex_evol = from(_hindex_evol, date_first_hindex)
+
+    return _hindex_evol
 end
