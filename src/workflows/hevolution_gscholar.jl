@@ -22,7 +22,7 @@ function hevolution_gscholar(
                        SimpleLogger(log_io, Logging.Debug))
     global_logger(logger)
     @info "Logging" log_path
-  
+
     researcher = Researcher(; name = name, user_gscholar_query=query)
 
     @info "Searching Google Scholar Profiles" researcher.name researcher.user_gscholar_query

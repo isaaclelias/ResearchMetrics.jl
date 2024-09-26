@@ -110,26 +110,37 @@ function publications_from_wos_report(wos_report::XLSX.XLSXFile)::Vector{Publica
     return pubs
 end
 
+function name_from_wos_report(wos_report)
+    name = wos_report["savedrecs"]["A1"]
+    name = replace(name , r" \(Author\)" => "")
+
+    return name
+end
+
 function researcher_from_wos_report(wos_report::XLSX.XLSXFile)::Researcher
     researcher = Researcher()
     
     researcher.abstracts = publications_from_wos_report(wos_report)
     researcher.wosrep_timespan = timespan_from_wos_report(wos_report)
-    researcher.wosrep_name = wos_report["savedrecs"]["A1"]
+    researcher.wosrep_name = name_from_wos_report(wos_report)
     researcher.wosrep_hindex = wos_report["savedrecs"]["B9"]
     researcher.wosrep_citation_count = wos_report["savedrecs"]["B7"]
     
     return researcher
 end
 
-function hevolution_wos_report(filepath)
+function cd_name_dir(name)
+    name_log = replace(name, " "=>"") # Remove all the spaces from NAME
+    mkpath("results/"*name_log)
+    cd("results/"*name_log) # let's do everything inside the researchers folder
+end
+
+function hevolution_wos_report(filepath, prizes, no_trend_lines, name)
     wos_report = load_wos_report(filepath)
-
     researcher = researcher_from_wos_report(wos_report)
-    @show values(researcher.abstracts[2].wosrep_citation_count_evol[end])
-    @show researcher.abstracts[2].wosrep_title
-
-    #publications(wos_report)
-
+    cd_name_dir(name)
+    res_hindex_evol = hindex_evol_from_wos_report(researcher)
+    plt = plot_hindex_evol(res_hindex_evol, name, prizes, trendlines=!no_trend_lines)
+    _save_plot(plt)
 end
 
